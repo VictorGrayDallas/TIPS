@@ -1,4 +1,6 @@
-﻿namespace TIPS;
+﻿using Microsoft.Maui.Controls;
+
+namespace TIPS;
 
 public partial class App : Application
 {

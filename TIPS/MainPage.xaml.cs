@@ -1,4 +1,8 @@
-﻿namespace TIPS;
+﻿using Microsoft.Maui.Accessibility;
+using Microsoft.Maui.Controls;
+using System;
+
+namespace TIPS;
 
 public partial class MainPage : ContentPage
 {
