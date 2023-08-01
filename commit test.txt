@@ -1,1 +1,0 @@
-Testing that I can commit and push with my WGU GitLab account.
