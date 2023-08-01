@@ -12,5 +12,10 @@ namespace TIPS
 		public string Description { get; set; } = "";
 		public decimal Amount { get; set; } = 0;
 		public List<string> Tags { get; set; } = new();
+
+		public Expense(DateOnly date)
+		{
+			Date = date;
+		}
 	}
 }

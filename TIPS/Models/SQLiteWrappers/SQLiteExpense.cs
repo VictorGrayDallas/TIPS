@@ -1,11 +1,12 @@
 ﻿using SQLite;
+using System;
 using System.Collections.Generic;
 using TIPS;
 
 namespace TIPS.SQLite
 {
 	[Table("Expense")]
-	internal class SQLiteExpense : Expense
+	class SQLiteExpense : Expense
 	{
 		// Properties we need to add for SQLite objects
 		[PrimaryKey, AutoIncrement]
@@ -17,5 +18,12 @@ namespace TIPS.SQLite
 		public new int Tags { get; set; }
 		public List<int> TagIDs { get; set; } = new();
 
+
+		public SQLiteExpense(DateOnly date) : base(date) { }
+
+		/// <summary>
+		/// Required by SQLite. Do not use.
+		/// </summary>
+		public SQLiteExpense() : base(new DateOnly()) { }
 	}
 }
