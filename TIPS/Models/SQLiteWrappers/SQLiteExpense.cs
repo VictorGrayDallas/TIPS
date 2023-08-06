@@ -16,7 +16,12 @@ namespace TIPS.SQLite
 		// Properties that SQLite should replace
 		[Ignore]
 		public new int Tags { get; set; }
-		public List<int> TagIDs { get; set; } = new();
+		//public List<int> TagIDs { get; set; } = new(); TODO
+
+		public new DateTime Date {
+			get => base.Date.ToDateTime(new TimeOnly(12, 0), DateTimeKind.Utc);
+			set => base.Date = DateOnly.FromDateTime(value);
+		}
 
 
 		public SQLiteExpense(DateOnly date) : base(date) { }

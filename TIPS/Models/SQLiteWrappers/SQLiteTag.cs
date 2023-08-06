@@ -12,5 +12,14 @@ namespace TIPS.SQLite
 
 
 		public string TagName { get; set; } = "[unnamed]";
+
+		public SQLiteTag(string tag)
+		{
+			TagName = tag;
+		}
+		/// <summary>
+		/// Required by SQLite. Do not use.
+		/// </summary>
+		public SQLiteTag() { }
 	}
 }
