@@ -20,6 +20,15 @@ namespace TIPSTestProject
 			service = new(testDbName);
 		}
 
+		private void AssertExpensesMatch(Expense first, Expense second)
+		{
+			assert(first.Amount == second.Amount);
+			assert(first.Description == second.Description);
+			assert(first.Tags.Count == second.Tags.Count);
+			for (int i = 0; i < first.Tags.Count; i++)
+				assert(first.Tags[i] == second.Tags[i]);
+		}
+
 		[TestCleanup]
 		public void Cleanup()
 		{
@@ -67,6 +76,19 @@ namespace TIPSTestProject
 		}
 
 		[TestMethod]
+		public async Task TestRenameTag()
+		{
+			await service.AddTag("tagToRename");
+			HashSet<string> tags = (await service.GetAllTags()).ToHashSet();
+			assert(tags.Contains("tagToRename"));
+
+			await service.RenameTag("tagToRename", "newName");
+			tags = (await service.GetAllTags()).ToHashSet();
+			assert(!tags.Contains("tagToRename"));
+			assert(tags.Contains("newName"));
+		}
+
+		[TestMethod]
 		public async Task TestAddingDeletingExpense()
 		{
 			IEnumerable<Expense> expenses = await service.GetExpenses();
@@ -82,12 +104,40 @@ namespace TIPSTestProject
 			expenses = await service.GetExpenses();
 			assert(expenses.Count() == 1);
 			Expense returnedExpense = expenses.First();
-			assert(returnedExpense.Amount == expense.Amount);
-			assert(returnedExpense.Description == expense.Description);
-			assert(returnedExpense.Tags.Count == expense.Tags.Count);
-			for (int i = 0; i < expense.Tags.Count; i++)
-				assert(returnedExpense.Tags[i] == expense.Tags[i]);
+			AssertExpensesMatch(returnedExpense, expense);
 
+			await service.DeleteExpense(returnedExpense);
+			expenses = await service.GetExpenses();
+			assert(expenses.Count() == 0);
+		}
+
+		[TestMethod]
+		public async Task TestUpdatingExpense()
+		{
+			IEnumerable<Expense> expenses = await service.GetExpenses();
+			assert(expenses.Count() == 0, "Another test left one or more expenses in the database.");
+
+			// Create and add
+			Expense expense = new Expense(new DateOnly(2016, 4, 9));
+			expense.Amount = 5m;
+			expense.Description = "testing";
+			expense.Tags.Add("tag1");
+			expense.Tags.Add("tag2");
+			expense = await service.AddExpense(expense);
+
+			// Modify and update
+			expense.Description = "tested";
+			expense.Amount = 8m;
+			expense.Tags.RemoveAt(0);
+			await service.UpdateExpense(expense);
+
+			// Get from DB and verify
+			expenses = await service.GetExpenses();
+			assert(expenses.Count() == 1);
+			Expense returnedExpense = expenses.First();
+			AssertExpensesMatch(returnedExpense, expense);
+
+			// Clean
 			await service.DeleteExpense(returnedExpense);
 			expenses = await service.GetExpenses();
 			assert(expenses.Count() == 0);

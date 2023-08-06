@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using Microsoft.Maui.Controls;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -127,6 +128,27 @@ namespace TIPS
 
 			return true;
 		}
+
+		public async Task<bool> RenameTag(string oldName, string newName)
+		{
+			if (!Initialized)
+				await Init();
+			if (!AllTags!.ContainsKey(oldName))
+				return false;
+			if (oldName == newName)
+				return true;
+
+			SQLiteTag sTag = new(newName);
+			sTag.Id = AllTags[oldName];		
+			bool result = await _db!.UpdateAsync(sTag) == 1;
+
+			if (result)
+			{
+				AllTags.Remove(oldName);
+				AllTags.Add(newName, sTag.Id);
+			}
+			return result;
+		}
 		#endregion
 
 		#region "expenses"
@@ -203,10 +225,21 @@ namespace TIPS
 				await Init();
 
 			if (expense is SQLiteExpense sqlExpense)
-				return await _db!.DeleteAsync<SQLiteExpense>(sqlExpense.Id) != 0;
+				return await _db!.DeleteAsync<SQLiteExpense>(sqlExpense.Id) == 1;
 			else
 				throw new Exception("Attempted to delete an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
 
+		}
+
+		public async Task<bool> UpdateExpense(Expense expense)
+		{
+			if (!Initialized)
+				await Init();
+
+			if (expense is SQLiteExpense sqlExpense)
+				return await _db!.UpdateAsync(sqlExpense) == 1;
+			else
+				throw new Exception("Attempted to update an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
 		}
 		#endregion
 	}

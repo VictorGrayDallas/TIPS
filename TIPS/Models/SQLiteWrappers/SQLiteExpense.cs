@@ -30,7 +30,7 @@ namespace TIPS.SQLite
 				base.Tags = new List<string>();
 				for (int i = 0; i < value.Length; i += sizeof(int))
 				{
-					int id = BitConverter.ToInt32(value, i * sizeof(int));
+					int id = BitConverter.ToInt32(value, i);
 					base.Tags.Add(SQLiteService._TagName(id));
 				}
 			}
