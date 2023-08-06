@@ -12,7 +12,6 @@ namespace TIPS.SQLite
 		[PrimaryKey, AutoIncrement]
 		public int Id { get; set; } = -1;
 
-
 		// Properties that SQLite should replace
 		public new byte[] Tags {
 			get
@@ -37,6 +36,8 @@ namespace TIPS.SQLite
 		}
 
 		// SQLite does not understand DateOnly.
+		// Plus we want to index it
+		[Indexed]
 		public new DateTime Date {
 			get => base.Date.ToDateTime(new TimeOnly(12, 0), DateTimeKind.Utc);
 			set => base.Date = DateOnly.FromDateTime(value);
