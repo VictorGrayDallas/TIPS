@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Storage;
-using SQLite;
+﻿using SQLite;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -59,21 +58,36 @@ namespace TIPS
 			Initialized = true;
 		}
 
+
 		#region "tags"
 		private Dictionary<string, int>? AllTags;
+		private static Dictionary<string, int> _TagIDsForBlobBuilding = new();
+		private static Dictionary<int, string> _TagNamesForBlobParsing = new();
+		/// <summary>
+		/// Intended for internal use by SQLite types only.
+		/// </summary>
+		internal static int _TagId(string tagName) => _TagIDsForBlobBuilding[tagName];
+		/// <summary>
+		/// Intended for internal use by SQLite types only.
+		/// </summary>
+		internal static string _TagName(int tagId) => _TagNamesForBlobParsing[tagId];
+
+
+		private async Task LoadTags()
+		{
+			var dbTags = await _db!.Table<SQLiteTag>().ToListAsync();
+			AllTags = new();
+			foreach (SQLiteTag tag in dbTags)
+				AllTags[tag.TagName] = tag.Id;
+		}
 		public async Task<IEnumerable<string>> GetAllTags()
 		{
 			if (!Initialized)
 				await Init();
 			if (AllTags == null)
-			{
-				var dbTags = await _db!.Table<SQLiteTag>().ToListAsync();
-				AllTags = new();
-				foreach (SQLiteTag tag in dbTags)
-					AllTags[tag.TagName] = tag.Id;
-			}
+				await LoadTags();
 
-			return AllTags.Keys;
+			return AllTags!.Keys;
 		}
 
 		public async Task<bool> AddTag(string tagName)
@@ -115,5 +129,85 @@ namespace TIPS
 		}
 		#endregion
 
+		#region "expenses"
+		public async Task<IEnumerable<Expense>> GetExpenses(DateOnly? beginInclusive = null, DateOnly? endInclusive = null)
+		{
+			if (!Initialized)
+				await Init();
+			// SQLite will set the Tags property. Since SQLite can't handle lists, we use a blob which must
+			// be converted back to a list. The property's get/set methods need access to tag IDs.
+			if (AllTags == null)
+				await LoadTags();
+			_TagNamesForBlobParsing = new();
+			foreach (KeyValuePair<string, int> kvp in AllTags!)
+				_TagNamesForBlobParsing[kvp.Value] = kvp.Key;
+
+			DateTime begin = beginInclusive == null ? DateTime.MinValue :
+				beginInclusive.Value.ToDateTime(new TimeOnly(0, 0), DateTimeKind.Utc);
+			DateTime end = endInclusive == null ? DateTime.MaxValue :
+				endInclusive.Value.AddDays(1).ToDateTime(new TimeOnly(0, 0), DateTimeKind.Utc);
+
+			var dbExpenses = await _db!.Table<SQLiteExpense>()
+				.Where((e) => e.Date >= begin && e.Date < end)
+				.ToListAsync();
+			return dbExpenses;
+		}
+
+		private async Task<SQLiteExpense> Insert(SQLiteExpense expense)
+		{
+			// SQLite will access the Tags property. Since SQLite can't handle lists, we dynamically convert
+			// it to a blob. The property's get/set methods need access to tag IDs.
+			if (AllTags == null)
+				await LoadTags();
+			// Further, we need to ensure all tags are already added.
+			foreach (string tag in (expense as Expense).Tags)
+				await AddTag(tag);
+			_TagIDsForBlobBuilding = AllTags!;
+
+			// Now we can insert
+			if (await _db!.InsertAsync(expense, typeof(SQLiteExpense)) == 1)
+				return expense;
+			else
+				// I do not know if this can ever actually happen.
+				throw new Exception("SQLite failed to insert, for unknown reason.");
+		}
+
+		/// <summary>
+		/// Adds the expense. If it already exists, does nothing.
+		/// </summary>
+		/// <returns>Returns the SQLite expense that was added (or already existed).
+		/// Use the returned Expense object for any future updates or deletes.</returns>
+		public async Task<Expense> AddExpense(Expense expense)
+		{
+			if (!Initialized)
+				await Init();
+
+			if (expense is SQLiteExpense sqlExpense)
+			{
+				// If this expense already exists, SQLite will add a copy of it and change this instance's Id.
+				// This is not what we want, since the caller will no longer have a reference to the original course.
+				SQLiteExpense? existingExpense = await _db!.FindAsync<SQLiteExpense>(sqlExpense.Id);
+				return existingExpense ?? await Insert(sqlExpense);
+			}
+			else
+			{
+				SQLiteExpense newExpense = new SQLiteExpense(expense);
+				return await Insert(newExpense);
+			}
+
+		}
+
+		public async Task<bool> DeleteExpense(Expense expense)
+		{
+			if (!Initialized)
+				await Init();
+
+			if (expense is SQLiteExpense sqlExpense)
+				return await _db!.DeleteAsync<SQLiteExpense>(sqlExpense.Id) != 0;
+			else
+				throw new Exception("Attempted to delete an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
+
+		}
+		#endregion
 	}
 }

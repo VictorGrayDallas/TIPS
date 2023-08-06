@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 
 using TIPS;
+using System.ComponentModel.Design;
 
 namespace TIPSTestProject
 {
@@ -63,6 +64,33 @@ namespace TIPSTestProject
 			await service.DeleteTag("delete");
 			tags = (await service.GetAllTags()).ToHashSet();
 			assert(!tags.Contains("delete"));
+		}
+
+		[TestMethod]
+		public async Task TestAddingDeletingExpense()
+		{
+			IEnumerable<Expense> expenses = await service.GetExpenses();
+			assert(expenses.Count() == 0, "Another test left one or more expenses in the database.");
+
+			Expense expense = new Expense(new DateOnly(2016, 4, 9));
+			expense.Amount = 5m;
+			expense.Description = "testing";
+			expense.Tags.Add("tag1");
+			expense.Tags.Add("tag2");
+			await service.AddExpense(expense);
+
+			expenses = await service.GetExpenses();
+			assert(expenses.Count() == 1);
+			Expense returnedExpense = expenses.First();
+			assert(returnedExpense.Amount == expense.Amount);
+			assert(returnedExpense.Description == expense.Description);
+			assert(returnedExpense.Tags.Count == expense.Tags.Count);
+			for (int i = 0; i < expense.Tags.Count; i++)
+				assert(returnedExpense.Tags[i] == expense.Tags[i]);
+
+			await service.DeleteExpense(returnedExpense);
+			expenses = await service.GetExpenses();
+			assert(expenses.Count() == 0);
 		}
 	}
 }
