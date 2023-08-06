@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:TIPS"
+             xmlns:vms="clr-namespace:TIPS.ViewModels"
+             x:Class="TIPS.Views.Dashboard"
+             x:DataType="vms:DashboardModel"
+             Title="Dashboard">
+    <VerticalStackLayout Spacing="10"
+                         Padding="8">
+        <Label 
+            Text="Most recent expenses"
+            HorizontalOptions="Center" />
+        <CollectionView x:Name="viewRecentExpenses"
+                        ItemsSource="{Binding RecentExpenses}"
+                        Margin="20"
+                        SelectionMode="Single"
+                        SelectionChanged="viewRecentExpenses_SelectionChanged">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+            
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:Expense">
+                    <StackLayout>
+                        <Label Text="{Binding Amount}" FontSize="22"/>
+                        <Label Text="{Binding Description}" FontSize="14"/>
+                        <Label Text="{Binding Date}" FontSize="14" TextColor="Silver"/>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button x:Name="testbutton"
+                Clicked="testbutton_Clicked" />
+
+        <Button x:Name="newExpense"
+                Text="Add new expense"
+                Clicked="newExpense_Clicked" />
+        
+    </VerticalStackLayout>
+</ContentPage>

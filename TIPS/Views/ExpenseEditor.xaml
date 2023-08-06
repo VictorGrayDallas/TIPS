@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vms="clr-namespace:TIPS.ViewModels"
+             x:Class="TIPS.Views.ExpenseEditor"
+             x:DataType="vms:ExpenseEditorModel"
+             Title="ExpenseEditor">
+    <VerticalStackLayout Spacing="10"
+                         Margin="8">
+        <Label Text="Expense Editor"
+               HorizontalOptions="Center"
+               FontSize="Title" />
+
+        <Grid ColumnDefinitions="1,5">
+            <Button Text="Save"
+                    Margin="3"
+                    x:Name="saveExpense"
+                    Grid.Column="0"
+                    Clicked="saveExpense_Clicked" />
+            <Button Text="Cancel"
+                    Margin="3"
+                    x:Name="cancelExpense"
+                    Grid.Column="1"
+                    Clicked="cancelExpense_Clicked" />
+        </Grid>
+    </VerticalStackLayout>
+</ContentPage>
