@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:TIPS.Views"
              xmlns:vms="clr-namespace:TIPS.ViewModels"
+             xmlns:local="clr-namespace:TIPS"
              x:Class="TIPS.Views.ExpenseEditor"
              x:DataType="vms:ExpenseEditorModel"
              Title="ExpenseEditor">
@@ -10,8 +12,47 @@
         <Label Text="Expense Editor"
                HorizontalOptions="Center"
                FontSize="Title" />
-
-        <Grid ColumnDefinitions="1,5">
+        <Grid ColumnDefinitions="Auto, 1*"
+              ColumnSpacing="12"
+              RowDefinitions="Auto, Auto, Auto, Auto, Auto" >
+            <Label Text="Amount"
+                   VerticalOptions="Center"/>
+            <views:MoneyEntry x:Name="amountEntry"
+                              Placeholder="Amount"
+                              Value="{Binding EditedExpense.Amount, Mode=OneWayToSource}"
+                              Grid.Column="1" />
+            <Label Text="Date"
+                   VerticalOptions="Center"
+                   Grid.Row="1" />
+            <DatePicker x:Name="dateEntry"
+                        Date="{Binding EditedExpense.Date, Mode=OneWayToSource, Converter={vms:DateOnlySourceConverter}}"
+                        Grid.Row="1"
+                        Grid.Column="1" />
+            <Label Text="Description"
+                   VerticalOptions="Center"
+                   Grid.Row="2" />
+            <Entry x:Name="descriptionEntry"
+                   Text="{Binding EditedExpense.Description, Mode=OneWayToSource}"
+                   Placeholder="Description"
+                   Grid.Row="2"
+                   Grid.Column="1" />
+            <Label Text="Tag(s)"
+                   x:Name="tagsLabel"
+                   VerticalOptions="Start"
+                   BindingContext="{x:Reference Name=descriptionEntry}"
+                   x:DataType="Entry"
+                   HeightRequest="{Binding Path=Height, Mode=OneWay}"
+                   VerticalTextAlignment="Center"
+                   Grid.Row="3" />
+            <views:TagPicker x:Name="tagEntry"
+                             
+                             Grid.Row="3"
+                             Grid.Column="1" />
+        </Grid>
+                
+        <!-- Save, cancel, delete buttons -->
+        <Grid ColumnDefinitions="1*, 1*, 1*"
+              x:Name="saveCancelGrid">
             <Button Text="Save"
                     Margin="3"
                     x:Name="saveExpense"
@@ -22,6 +63,12 @@
                     x:Name="cancelExpense"
                     Grid.Column="1"
                     Clicked="cancelExpense_Clicked" />
+            <Button Text="Delete"
+                    IsVisible="{Binding NotNew, Mode=OneWay}"
+                    Margin="3"
+                    x:Name="deleteExpense"
+                    Grid.Column="2"
+                    Clicked="deleteExpense_Clicked" />
         </Grid>
     </VerticalStackLayout>
 </ContentPage>

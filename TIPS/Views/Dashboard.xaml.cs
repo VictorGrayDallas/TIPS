@@ -7,13 +7,14 @@ using TIPS.ViewModels;
 
 namespace TIPS.Views;
 
-public partial class Dashboard : ContentPage
+public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 {
-	private DashboardModel model = new();
+	private DashboardModel model;
 
 	public Dashboard()
 	{
 		InitializeComponent();
+		model = new(this);
 		BindingContext = model;
 
 		new Thread(_ =>
@@ -22,6 +23,13 @@ public partial class Dashboard : ContentPage
 
 			MainThread.BeginInvokeOnMainThread(() => testbutton.Text = "Init called");
 		}).Start();
+	}
+
+	void DashboardModel.DashboardUI.GetNewExpenseFromUser(Action<ExpenseEditorModel> callback)
+	{
+		ExpenseEditor editor = new ExpenseEditor(null);
+		editor.Closing += callback;
+		_ = Navigation.PushModalAsync(editor);
 	}
 
 	private void viewRecentExpenses_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -34,9 +42,6 @@ public partial class Dashboard : ContentPage
 		_ = model.RefreshRecents();
 	}
 
-	private void newExpense_Clicked(object sender, EventArgs e)
-	{
-		//Shell.Current.GoToAsync(nameof(ExpenseEditor));
-		Navigation.PushModalAsync(new ExpenseEditor());
-	}
+	private void newExpense_Clicked(object sender, EventArgs e) => model.NewExpenseClicked();
+
 }

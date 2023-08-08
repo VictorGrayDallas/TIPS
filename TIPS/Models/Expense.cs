@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TIPS
 {
-	internal class Expense
+	public class Expense
 	{
 		public DateOnly Date { get; set; }
 		public string Description { get; set; } = "";
@@ -16,6 +16,14 @@ namespace TIPS
 		public Expense(DateOnly date)
 		{
 			Date = date;
+		}
+
+		public void CopyFrom(Expense other)
+		{
+			Date = other.Date;
+			Description = other.Description;
+			Amount = other.Amount;
+			Tags = other.Tags.ToList();
 		}
 	}
 }
