@@ -12,6 +12,6 @@ namespace TIPS.ViewModels
 
 		string DefaultDatabaseName { get; }
 
-		SQLiteService GetSQLiteService(string filename);
+		SQLiteService GetSQLiteService(string? filename = null);
 	}
 }

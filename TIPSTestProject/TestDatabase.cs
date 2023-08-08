@@ -20,15 +20,6 @@ namespace TIPSTestProject
 			service = new(testDbName);
 		}
 
-		private void AssertExpensesMatch(Expense first, Expense second)
-		{
-			assert(first.Amount == second.Amount);
-			assert(first.Description == second.Description);
-			assert(first.Tags.Count == second.Tags.Count);
-			for (int i = 0; i < first.Tags.Count; i++)
-				assert(first.Tags[i] == second.Tags[i]);
-		}
-
 		[TestCleanup]
 		public void Cleanup()
 		{
@@ -104,7 +95,7 @@ namespace TIPSTestProject
 			expenses = await service.GetExpenses();
 			assert(expenses.Count() == 1);
 			Expense returnedExpense = expenses.First();
-			AssertExpensesMatch(returnedExpense, expense);
+			TIPSAssert.AssertExpensesMatch(returnedExpense, expense);
 
 			await service.DeleteExpense(returnedExpense);
 			expenses = await service.GetExpenses();
@@ -135,7 +126,7 @@ namespace TIPSTestProject
 			expenses = await service.GetExpenses();
 			assert(expenses.Count() == 1);
 			Expense returnedExpense = expenses.First();
-			AssertExpensesMatch(returnedExpense, expense);
+			TIPSAssert.AssertExpensesMatch(returnedExpense, expense);
 
 			// Clean
 			await service.DeleteExpense(returnedExpense);

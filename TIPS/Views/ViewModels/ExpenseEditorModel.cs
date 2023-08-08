@@ -92,5 +92,17 @@ namespace TIPS.ViewModels
 			Result = PageResult.CANCEL;
 			ui.Close();
 		}
+
+		public void DeleteClicked()
+		{
+			Result = PageResult.DELETE;
+			if (originalExpense != null)
+			{
+				// We need to return the original object so the caller can delete it from the database.
+				EditedExpense = originalExpense;
+			}
+
+			ui.Close();
+		}
 	}
 }
