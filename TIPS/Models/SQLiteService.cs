@@ -275,7 +275,7 @@ namespace TIPS
 		#endregion
 
 		#region "recurring expenses"
-		public async Task<IEnumerable<RecurringExpense>> GetRecurringExpenses()
+		public async Task<IEnumerable<RecurringExpense>> GetRecurringExpenses(bool onlyPastDue = false)
 		{
 			if (!Initialized)
 				await Init();
@@ -284,7 +284,17 @@ namespace TIPS
 			if (AllTags == null)
 				await LoadTags();
 
-			var dbRecurringExpenses = await _db!.Table<SQLiteRecurringExpense>().ToListAsync();
+			var query = _db!.Table<SQLiteRecurringExpense>();
+			if (onlyPastDue)
+			{
+				// We have to get a DateTime (not DateOnly) object for SQLite.
+				// Make sure it's UTC (SQLite's timezome) and at the start of the next day.
+				DateOnly endDateOnly = DateOnly.FromDateTime(DateTime.Today);
+				DateTime end = endDateOnly.AddDays(1).ToDateTime(new TimeOnly(0, 0), DateTimeKind.Utc);
+				query = query.Where((e) => e.Date < end);
+			}
+
+			var dbRecurringExpenses = await query.ToListAsync();
 			dbRecurringExpenses.ForEach((e) => ((ISQLiteExpense)e).ReceiveData(tagNamesForBlobParsing));
 			return dbRecurringExpenses;
 		}
@@ -332,6 +342,27 @@ namespace TIPS
 			}
 			else
 				throw new SQLiteServiceException("Attempted to update a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
+		}
+
+		public async Task ProcessRecurringExpenses()
+		{
+			List<Task> tasks = new();
+
+			IEnumerable<RecurringExpense> recurringExpenses = await GetRecurringExpenses(true);
+			foreach (RecurringExpense re in recurringExpenses)
+			{
+				while (re.Date <= DateOnly.FromDateTime(DateTime.Today))
+				{
+					Expense expense = new Expense(re.Date);
+					expense.CopyFrom(re);
+					tasks.Add(AddExpense(expense));
+					re.MoveToNextDate();
+				}
+				tasks.Add(UpdateRecurringExpense(re));
+			}
+
+			foreach (Task t in tasks)
+				await t;
 		}
 		#endregion
 	}

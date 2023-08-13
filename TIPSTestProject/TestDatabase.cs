@@ -167,5 +167,47 @@ namespace TIPSTestProject
 			RecurringExpense returnedExpense = expenses.First();
 			TIPSAssert.AssertExpensesMatch(returnedExpense, expense);
 		}
+
+		[TestMethod]
+		public async Task TestProcessRecurringExpenses()
+		{
+			RecurringExpense recurringExpense = new RecurringExpense(
+				DateOnly.FromDateTime(DateTime.Today).AddDays(-4), 5, RecurringExpense.FrequencyUnits.Days);
+			recurringExpense.Amount = 5m;
+			recurringExpense.Description = "testing";
+			recurringExpense.Tags.Add("tag1");
+			recurringExpense.Tags.Add("tag2");
+			Expense copyFromRecurringExpense = new Expense(new DateOnly());
+			copyFromRecurringExpense.CopyFrom(recurringExpense);
+			RecurringExpense originalRecurringExpenseData = new RecurringExpense(
+				recurringExpense.Date, recurringExpense.Frequency, recurringExpense.FrequencyUnit);
+			originalRecurringExpenseData.CopyFrom(recurringExpense);
+
+			await service.AddRecurringExpense(recurringExpense);
+			await service.ProcessRecurringExpenses();
+
+			IEnumerable<Expense> expenses = await service.GetExpenses();
+			assert(expenses.Count() == 1);
+			Expense expense = expenses.First();
+			TIPSAssert.AssertExpensesMatch(expense, copyFromRecurringExpense);
+
+			IEnumerable<RecurringExpense> recurringExpenses = await service.GetRecurringExpenses();
+			recurringExpense = recurringExpenses.First();
+			originalRecurringExpenseData.MoveToNextDate();
+			TIPSAssert.AssertExpensesMatch(recurringExpense, originalRecurringExpenseData);
+		}
+
+		[TestMethod]
+		public async Task TestRecurringExpenseCanCreateMultipleExpenses()
+		{
+			RecurringExpense recurringExpense = new RecurringExpense(
+				DateOnly.FromDateTime(DateTime.Today).AddDays(-5), 5, RecurringExpense.FrequencyUnits.Days);
+
+			await service.AddRecurringExpense(recurringExpense);
+			await service.ProcessRecurringExpenses();
+
+			IEnumerable<Expense> expenses = await service.GetExpenses();
+			assert(expenses.Count() == 2);
+		}
 	}
 }

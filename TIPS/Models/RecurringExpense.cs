@@ -24,5 +24,17 @@ namespace TIPS
 			Frequency = frequncy;
 			FrequencyUnit = unit;
 		}
+
+		public void MoveToNextDate()
+		{
+			if (FrequencyUnit == FrequencyUnits.Days)
+				Date = Date.AddDays(Frequency);
+			else if (FrequencyUnit == FrequencyUnits.Weeks)
+				Date = Date.AddDays(Frequency * 7);
+			else if (FrequencyUnit == FrequencyUnits.Months)
+				Date = Date.AddMonths(Frequency);
+			else if (FrequencyUnit == FrequencyUnits.Years)
+				Date = Date.AddYears(Frequency);
+		}
 	}
 }
