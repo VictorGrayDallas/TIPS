@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Text;
-
 using TIPS;
-using System.ComponentModel.Design;
 
 namespace TIPSTestProject
 {
@@ -15,6 +12,7 @@ namespace TIPSTestProject
 		private string testDbName = Path.Combine(TestPlatformService.Instance.AppDataPath, TestPlatformService.Instance.DefaultDatabaseName);
 		private SQLiteService service;
 
+		// Constructor runs once for EACH test.
 		public TestDatabase()
 		{
 			if (File.Exists(testDbName))
@@ -22,6 +20,7 @@ namespace TIPSTestProject
 			service = new(testDbName);
 		}
 
+		// Runs once for EACH test.
 		[TestCleanup]
 		public void Cleanup()
 		{
@@ -84,9 +83,6 @@ namespace TIPSTestProject
 		[TestMethod]
 		public async Task TestAddingDeletingExpense()
 		{
-			IEnumerable<Expense> expenses = await service.GetExpenses();
-			assert(expenses.Count() == 0, "Another test left one or more expenses in the database.");
-
 			Expense expense = new Expense(new DateOnly(2016, 4, 9));
 			expense.Amount = 5m;
 			expense.Description = "testing";
@@ -94,22 +90,19 @@ namespace TIPSTestProject
 			expense.Tags.Add("tag2");
 			await service.AddExpense(expense);
 
-			expenses = await service.GetExpenses();
+			IEnumerable<Expense>  expenses = await service.GetExpenses();
 			assert(expenses.Count() == 1);
 			Expense returnedExpense = expenses.First();
 			TIPSAssert.AssertExpensesMatch(returnedExpense, expense);
 
 			await service.DeleteExpense(returnedExpense);
 			expenses = await service.GetExpenses();
-			assert(expenses.Count() == 0);
+			assert(!expenses.Any());
 		}
 
 		[TestMethod]
 		public async Task TestUpdatingExpense()
 		{
-			IEnumerable<Expense> expenses = await service.GetExpenses();
-			assert(expenses.Count() == 0, "Another test left one or more expenses in the database.");
-
 			// Create and add
 			Expense expense = new Expense(new DateOnly(2016, 4, 9));
 			expense.Amount = 5m;
@@ -125,23 +118,15 @@ namespace TIPSTestProject
 			await service.UpdateExpense(expense);
 
 			// Get from DB and verify
-			expenses = await service.GetExpenses();
+			IEnumerable<Expense> expenses = await service.GetExpenses();
 			assert(expenses.Count() == 1);
 			Expense returnedExpense = expenses.First();
 			TIPSAssert.AssertExpensesMatch(returnedExpense, expense);
-
-			// Clean
-			await service.DeleteExpense(returnedExpense);
-			expenses = await service.GetExpenses();
-			assert(expenses.Count() == 0);
 		}
 
 		[TestMethod]
 		public async Task TestAddingDeletingRecurringExpense()
 		{
-			IEnumerable<RecurringExpense> expenses = await service.GetRecurringExpenses();
-			assert(expenses.Count() == 0, "Another test left one or more recurring expenses in the database.");
-
 			RecurringExpense expense = new RecurringExpense(new DateOnly(2016, 4, 9), 5, RecurringExpense.FrequencyUnits.Days);
 			expense.Amount = 5m;
 			expense.Description = "testing";
@@ -149,22 +134,19 @@ namespace TIPSTestProject
 			expense.Tags.Add("tag2");
 			await service.AddRecurringExpense(expense);
 
-			expenses = await service.GetRecurringExpenses();
+			IEnumerable<RecurringExpense> expenses = await service.GetRecurringExpenses();
 			assert(expenses.Count() == 1);
 			RecurringExpense returnedExpense = expenses.First();
 			TIPSAssert.AssertExpensesMatch(returnedExpense, expense);
 
 			await service.DeleteExpense(returnedExpense);
 			expenses = await service.GetRecurringExpenses();
-			assert(expenses.Count() == 0);
+			assert(!expenses.Any());
 		}
 
 		[TestMethod]
 		public async Task TestUpdatingRecurringExpense()
 		{
-			IEnumerable<RecurringExpense> expenses = await service.GetRecurringExpenses();
-			assert(expenses.Count() == 0, "Another test left one or more recurring expenses in the database.");
-
 			// Create and add
 			RecurringExpense expense = new RecurringExpense(new DateOnly(2016, 4, 9), 5, RecurringExpense.FrequencyUnits.Days);
 			expense.Amount = 5m;
@@ -180,16 +162,10 @@ namespace TIPSTestProject
 			await service.UpdateExpense(expense);
 
 			// Get from DB and verify
-			expenses = await service.GetRecurringExpenses();
+			IEnumerable<RecurringExpense> expenses = await service.GetRecurringExpenses();
 			assert(expenses.Count() == 1);
 			RecurringExpense returnedExpense = expenses.First();
 			TIPSAssert.AssertExpensesMatch(returnedExpense, expense);
-
-			// Clean
-			await service.DeleteExpense(returnedExpense);
-			expenses = await service.GetRecurringExpenses();
-			assert(expenses.Count() == 0);
 		}
-
 	}
 }
