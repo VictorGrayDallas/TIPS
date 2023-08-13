@@ -55,6 +55,7 @@ namespace TIPS
 
 			await _db.CreateTableAsync<SQLiteTag>();
 			await _db.CreateTableAsync<SQLiteExpense>();
+			await _db.CreateTableAsync<SQLiteRecurringExpense>();
 
 			Initialized = true;
 		}
@@ -175,19 +176,20 @@ namespace TIPS
 			return dbExpenses;
 		}
 
-		private async Task<SQLiteExpense> Insert(SQLiteExpense expense)
+		private async Task<Expense> Insert(Expense expense)
 		{
 			// SQLite will access the Tags property. Since SQLite can't handle lists, we dynamically convert
 			// it to a blob. The property's get/set methods need access to tag IDs.
 			if (AllTags == null)
 				await LoadTags();
 			// Further, we need to ensure all tags are already added.
-			foreach (string tag in (expense as Expense).Tags)
+			foreach (string tag in expense.Tags)
 				await AddTag(tag);
 			_TagIDsForBlobBuilding = AllTags!;
 
 			// Now we can insert
-			if (await _db!.InsertAsync(expense, typeof(SQLiteExpense)) == 1)
+			Type t = expense is SQLiteExpense ? typeof(SQLiteExpense) : typeof(SQLiteRecurringExpense);
+			if (await _db!.InsertAsync(expense, t) == 1)
 				return expense;
 			else
 				// I do not know if this can ever actually happen.
@@ -224,6 +226,16 @@ namespace TIPS
 			if (!Initialized)
 				await Init();
 
+			if (expense is RecurringExpense re)
+				return await DeleteRecurringExpense(re);
+			else
+				return await DeleteSingleExpense(expense);
+		}
+		private async Task<bool> DeleteSingleExpense(Expense expense)
+		{
+			if (!Initialized)
+				await Init();
+
 			if (expense is SQLiteExpense sqlExpense)
 				return await _db!.DeleteAsync<SQLiteExpense>(sqlExpense.Id) == 1;
 			else
@@ -236,10 +248,76 @@ namespace TIPS
 			if (!Initialized)
 				await Init();
 
+			if (expense is RecurringExpense re)
+				return await UpdateRecurringExpense(re);
+			else
+				return await UpdateSingleExpense(expense);
+		}
+		private async Task<bool> UpdateSingleExpense(Expense expense)
+		{ 
 			if (expense is SQLiteExpense sqlExpense)
 				return await _db!.UpdateAsync(sqlExpense) == 1;
 			else
 				throw new Exception("Attempted to update an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
+		}
+		#endregion
+
+		#region "recurring expenses"
+		public async Task<IEnumerable<RecurringExpense>> GetRecurringExpenses()
+		{
+			if (!Initialized)
+				await Init();
+			// SQLite will set the Tags property. Since SQLite can't handle lists, we use a blob which must
+			// be converted back to a list. The property's get/set methods need access to tag IDs.
+			if (AllTags == null)
+				await LoadTags();
+			_TagNamesForBlobParsing = new();
+			foreach (KeyValuePair<string, int> kvp in AllTags!)
+				_TagNamesForBlobParsing[kvp.Value] = kvp.Key;
+
+			var dbRecurringExpenses = await _db!.Table<SQLiteRecurringExpense>().ToListAsync();
+			return dbRecurringExpenses;
+		}
+
+		/// <summary>
+		/// Adds the expense. If it already exists, does nothing.
+		/// </summary>
+		/// <returns>Returns the SQLite expense that was added (or already existed).
+		/// Use the returned Expense object for any future updates or deletes.</returns>
+		public async Task<RecurringExpense> AddRecurringExpense(RecurringExpense expense)
+		{
+			if (!Initialized)
+				await Init();
+
+			if (expense is SQLiteRecurringExpense sqlExpense)
+			{
+				// If this expense already exists, SQLite will add a copy of it and change this instance's Id.
+				// This is not what we want, since the caller will no longer have a reference to the original course.
+				SQLiteRecurringExpense? existingExpense = await _db!.FindAsync<SQLiteRecurringExpense>(sqlExpense.Id);
+				return existingExpense ?? ((await Insert(sqlExpense)) as RecurringExpense)!;
+			}
+			else
+			{
+				SQLiteRecurringExpense newExpense = new SQLiteRecurringExpense(expense);
+				return ((await Insert(newExpense)) as RecurringExpense)!;
+			}
+
+		}
+
+		private async Task<bool> DeleteRecurringExpense(RecurringExpense expense)
+		{
+			if (expense is SQLiteRecurringExpense sqlExpense)
+				return await _db!.DeleteAsync<SQLiteRecurringExpense>(sqlExpense.Id) == 1;
+			else
+				throw new Exception("Attempted to delete a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
+		}
+
+		private async Task<bool> UpdateRecurringExpense(RecurringExpense expense)
+		{
+			if (expense is SQLiteRecurringExpense sqlExpense)
+				return await _db!.UpdateAsync(sqlExpense) == 1;
+			else
+				throw new Exception("Attempted to update a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
 		}
 		#endregion
 	}
