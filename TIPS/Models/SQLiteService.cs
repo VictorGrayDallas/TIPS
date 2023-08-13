@@ -6,12 +6,19 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TIPS.Models.SQLiteWrappers;
 using TIPS.SQLite;
 
 namespace TIPS
 {
+	public class SQLiteServiceException : Exception
+	{
+		public SQLiteServiceException(string message) : base(message) { }
+	}
+
 	internal class SQLiteService
 	{
+
 		private string dbName;
 		private SQLiteAsyncConnection? _db;
 
@@ -63,17 +70,7 @@ namespace TIPS
 
 		#region "tags"
 		private Dictionary<string, int>? AllTags;
-		private static Dictionary<string, int> _TagIDsForBlobBuilding = new();
-		private static Dictionary<int, string> _TagNamesForBlobParsing = new();
-		/// <summary>
-		/// Intended for internal use by SQLite types only.
-		/// </summary>
-		internal static int _TagId(string tagName) => _TagIDsForBlobBuilding[tagName];
-		/// <summary>
-		/// Intended for internal use by SQLite types only.
-		/// </summary>
-		internal static string _TagName(int tagId) => _TagNamesForBlobParsing[tagId];
-
+		private Dictionary<int, string> tagNamesForBlobParsing = new();
 
 		private async Task LoadTags()
 		{
@@ -81,6 +78,10 @@ namespace TIPS
 			AllTags = new();
 			foreach (SQLiteTag tag in dbTags)
 				AllTags[tag.TagName] = tag.Id;
+
+			tagNamesForBlobParsing = new();
+			foreach (KeyValuePair<string, int> kvp in AllTags!)
+				tagNamesForBlobParsing[kvp.Value] = kvp.Key;
 		}
 		public async Task<IEnumerable<string>> GetAllTags()
 		{
@@ -106,6 +107,7 @@ namespace TIPS
 			if (await _db!.InsertAsync(sTag, typeof(SQLiteTag)) == 1)
 			{
 				AllTags!.Add(tagName, sTag.Id);
+				tagNamesForBlobParsing.Add(sTag.Id, tagName);
 				return true;
 			}
 			else
@@ -124,7 +126,10 @@ namespace TIPS
 				if (await _db!.DeleteAsync<SQLiteTag>(AllTags[tagName]) == 0)
 					return false;
 				else
+				{
+					tagNamesForBlobParsing.Remove(AllTags[tagName]);
 					AllTags.Remove(tagName);
+				}
 			}
 
 			return true;
@@ -145,8 +150,10 @@ namespace TIPS
 
 			if (result)
 			{
+				tagNamesForBlobParsing.Remove(AllTags[oldName]);
 				AllTags.Remove(oldName);
 				AllTags.Add(newName, sTag.Id);
+				tagNamesForBlobParsing.Add(sTag.Id, newName);
 			}
 			return result;
 		}
@@ -161,9 +168,6 @@ namespace TIPS
 			// be converted back to a list. The property's get/set methods need access to tag IDs.
 			if (AllTags == null)
 				await LoadTags();
-			_TagNamesForBlobParsing = new();
-			foreach (KeyValuePair<string, int> kvp in AllTags!)
-				_TagNamesForBlobParsing[kvp.Value] = kvp.Key;
 
 			DateTime begin = beginInclusive == null ? DateTime.MinValue :
 				beginInclusive.Value.ToDateTime(new TimeOnly(0, 0), DateTimeKind.Utc);
@@ -173,19 +177,23 @@ namespace TIPS
 			var dbExpenses = await _db!.Table<SQLiteExpense>()
 				.Where((e) => e.Date >= begin && e.Date < end)
 				.ToListAsync();
+			dbExpenses.ForEach((e) => ((ISQLiteExpense)e).ReceiveData(tagNamesForBlobParsing));
 			return dbExpenses;
 		}
 
+		private async Task EnsureTagsExist(Expense expense)
+		{
+			if (AllTags == null)
+				await LoadTags();
+			foreach (string tag in expense.Tags)
+				await AddTag(tag);
+		}
 		private async Task<Expense> Insert(Expense expense)
 		{
 			// SQLite will access the Tags property. Since SQLite can't handle lists, we dynamically convert
 			// it to a blob. The property's get/set methods need access to tag IDs.
-			if (AllTags == null)
-				await LoadTags();
-			// Further, we need to ensure all tags are already added.
-			foreach (string tag in expense.Tags)
-				await AddTag(tag);
-			_TagIDsForBlobBuilding = AllTags!;
+			await EnsureTagsExist(expense);
+			(expense as ISQLiteExpense)!.ReceiveData(AllTags!);
 
 			// Now we can insert
 			Type t = expense is SQLiteExpense ? typeof(SQLiteExpense) : typeof(SQLiteRecurringExpense);
@@ -193,7 +201,7 @@ namespace TIPS
 				return expense;
 			else
 				// I do not know if this can ever actually happen.
-				throw new Exception("SQLite failed to insert, for unknown reason.");
+				throw new SQLiteServiceException("SQLite failed to insert, for unknown reason.");
 		}
 
 		/// <summary>
@@ -239,7 +247,7 @@ namespace TIPS
 			if (expense is SQLiteExpense sqlExpense)
 				return await _db!.DeleteAsync<SQLiteExpense>(sqlExpense.Id) == 1;
 			else
-				throw new Exception("Attempted to delete an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
+				throw new SQLiteServiceException("Attempted to delete an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
 
 		}
 
@@ -254,11 +262,15 @@ namespace TIPS
 				return await UpdateSingleExpense(expense);
 		}
 		private async Task<bool> UpdateSingleExpense(Expense expense)
-		{ 
+		{
 			if (expense is SQLiteExpense sqlExpense)
+			{
+				await EnsureTagsExist(expense);
+				((ISQLiteExpense)sqlExpense).ReceiveData(AllTags!);
 				return await _db!.UpdateAsync(sqlExpense) == 1;
+			}
 			else
-				throw new Exception("Attempted to update an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
+				throw new SQLiteServiceException("Attempted to update an expense that isn't a SQLite database expense. Use an instance that was returned by a Get or Add method.");
 		}
 		#endregion
 
@@ -271,11 +283,9 @@ namespace TIPS
 			// be converted back to a list. The property's get/set methods need access to tag IDs.
 			if (AllTags == null)
 				await LoadTags();
-			_TagNamesForBlobParsing = new();
-			foreach (KeyValuePair<string, int> kvp in AllTags!)
-				_TagNamesForBlobParsing[kvp.Value] = kvp.Key;
 
 			var dbRecurringExpenses = await _db!.Table<SQLiteRecurringExpense>().ToListAsync();
+			dbRecurringExpenses.ForEach((e) => ((ISQLiteExpense)e).ReceiveData(tagNamesForBlobParsing));
 			return dbRecurringExpenses;
 		}
 
@@ -309,15 +319,19 @@ namespace TIPS
 			if (expense is SQLiteRecurringExpense sqlExpense)
 				return await _db!.DeleteAsync<SQLiteRecurringExpense>(sqlExpense.Id) == 1;
 			else
-				throw new Exception("Attempted to delete a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
+				throw new SQLiteServiceException("Attempted to delete a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
 		}
 
 		private async Task<bool> UpdateRecurringExpense(RecurringExpense expense)
 		{
 			if (expense is SQLiteRecurringExpense sqlExpense)
+			{
+				await EnsureTagsExist(expense);
+				((ISQLiteExpense)sqlExpense).ReceiveData(AllTags!);
 				return await _db!.UpdateAsync(sqlExpense) == 1;
+			}
 			else
-				throw new Exception("Attempted to update a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
+				throw new SQLiteServiceException("Attempted to update a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
 		}
 		#endregion
 	}

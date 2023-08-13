@@ -4,26 +4,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TIPS.Models.SQLiteWrappers;
 using TIPS.SQLite;
 
 namespace TIPS.SQLite
 {
 	[Table("RecurringExpense")]
-	class SQLiteRecurringExpense : RecurringExpense
+	class SQLiteRecurringExpense : RecurringExpense, ISQLiteExpense
 	{
 		// Properties we need to add for SQLite objects
 		[PrimaryKey, AutoIncrement]
 		public int Id { get; set; } = -1;
 
 		// "Inherit" from sqlBase
+		private SQLiteExpense sqlBase;
 		public new byte[] Tags
 		{
 			get => sqlBase.Tags;
-			set
-			{
-				sqlBase.Tags = value;
-				base.Tags = (sqlBase as Expense).Tags;
-			}
+			set => sqlBase.Tags = value;
 		}
 		[Indexed]
 		public new DateTime Date
@@ -35,9 +33,13 @@ namespace TIPS.SQLite
 				base.Date = (sqlBase as Expense).Date;
 			}
 		}
+		void ISQLiteExpense.ReceiveData(object data)
+		{
+			((ISQLiteExpense)sqlBase).ReceiveData(data);
+			if (data is Dictionary<int, string> idDict)
+				base.Tags = (sqlBase as Expense).Tags;
+		}
 
-
-		private SQLiteExpense sqlBase;
 
 		public SQLiteRecurringExpense(RecurringExpense expense) : base(expense.Date, expense.Frequency, expense.FrequencyUnit)
 		{
@@ -55,5 +57,6 @@ namespace TIPS.SQLite
 		{
 			sqlBase = new SQLiteExpense(this);
 		}
+
 	}
 }
