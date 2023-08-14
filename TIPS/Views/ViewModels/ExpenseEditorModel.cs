@@ -37,10 +37,16 @@ namespace TIPS.ViewModels
 		}
 		public bool NotNew { get => !IsNew; }
 
+		public IEnumerable<string> AllTags { get => DefaultPlatformService.Instance.GetSQLiteService().GetAllTags().Result; }
+
 		public Expense EditedExpense { get; set; }
+
+		public bool IsRecurring { get => EditedExpense is RecurringExpense; }
+		public RecurringExpense? ExpenseAsRecurring { get => EditedExpense as RecurringExpense; }
+
+
 		private Expense? originalExpense { get; }
 
-		public IEnumerable<string> AllTags { get => DefaultPlatformService.Instance.GetSQLiteService().GetAllTags().Result; }
 
 		// Other things
 		public PageResult Result { get; private set; }
@@ -49,28 +55,34 @@ namespace TIPS.ViewModels
 		private ExpenseEditorUI ui;
 
 
-		public ExpenseEditorModel(Expense? expenseToEdit, ExpenseEditorUI ui, PlatformServices? platformServices = null)
+		public ExpenseEditorModel(bool newExpenseIsRecurring, ExpenseEditorUI ui, PlatformServices? platformServices = null)
 		{
 			this.platformServices = platformServices ?? DefaultPlatformService.Instance;
 			this.ui = ui;
-			originalExpense = expenseToEdit;
 
-			if (originalExpense == null)
-			{
-				EditedExpense = new Expense(DateOnly.FromDateTime(DateTime.Now))
-				{
-					Amount = 1.23m, // TODO: Fix the UI? The amountEntry is setting itself to $0.00
-					Description = "default",
-				};
-				IsNew = true;
-				ui.HideDeleteButton();
-			}
+			originalExpense = null;
+			if (newExpenseIsRecurring)
+				EditedExpense = new RecurringExpense(DateOnly.FromDateTime(DateTime.Now), 1, RecurringExpense.FrequencyUnits.Months);
 			else
-			{
-				EditedExpense = new Expense(originalExpense.Date);
-				EditedExpense.CopyFrom(originalExpense);
-				IsNew = false;
-			}			
+				EditedExpense = new Expense(DateOnly.FromDateTime(DateTime.Now));
+			EditedExpense.Amount = 1.23m;
+			EditedExpense.Description = "";
+
+			IsNew = true;
+			ui.HideDeleteButton();
+		}
+		public ExpenseEditorModel(Expense expenseToEdit, ExpenseEditorUI ui, PlatformServices? platformServices = null)
+		{
+			this.platformServices = platformServices ?? DefaultPlatformService.Instance;
+			this.ui = ui;
+
+			originalExpense = expenseToEdit;
+			if (originalExpense is RecurringExpense re)
+				EditedExpense = RecurringExpense.Copy(re);
+			else
+				EditedExpense = Expense.Copy(originalExpense);
+
+			IsNew = false;
 		}
 
 		public void SaveClicked()

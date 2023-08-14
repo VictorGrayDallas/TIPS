@@ -10,18 +10,48 @@ public partial class ExpenseEditor : ContentPage, ExpenseEditorModel.ExpenseEdit
 {
 	internal ExpenseEditorModel model;
 
-	public ExpenseEditor(Expense? toEdit)
+	public ExpenseEditor(Expense toEdit)
 	{
 		InitializeComponent();
 
 		model = new(toEdit, this);
+		Init();
+	}
+	public ExpenseEditor(bool newExpenseIsRecurring)
+	{
+		InitializeComponent();
 
-		// Since our bindings are OneWayToSource, we have to manually set initial values.
+		model = new(newExpenseIsRecurring, this);
+		Init();
+	}
+
+	private void Init()
+	{ 
+		// Since our bindings are OneWayToSource, we have to manually set initial values before assigning BindingContext.
 		amountEntry.Text = model.EditedExpense.Amount.ToString("N2");
 		dateEntry.Date = model.EditedExpense.Date.ToDateTime(new TimeOnly(12, 0));
 		descriptionEntry.Text = model.EditedExpense.Description;
 		tagEntry.ItemsSource = model.AllTags;
 		tagEntry.SetTags(model.EditedExpense.Tags);
+
+		if (model.IsRecurring)
+		{
+			frequencyEntry.Text = model.ExpenseAsRecurring!.Frequency.ToString();
+			unitPicker.ItemsSource = new RecurringExpense.FrequencyUnits[]
+			{
+				RecurringExpense.FrequencyUnits.Days,
+				RecurringExpense.FrequencyUnits.Weeks,
+				RecurringExpense.FrequencyUnits.Months,
+				RecurringExpense.FrequencyUnits.Years,
+			};
+			unitPicker.SelectedItem = model.ExpenseAsRecurring.FrequencyUnit;
+		}
+		else
+		{
+			frequencyEntry.IsEnabled = unitPicker.IsEnabled = false;
+			grid.RowDefinitions[4].Height = 0;
+		}
+
 		BindingContext = model;
 
 		// I cannot get this to work correctly. I tried using bindings in the XAML too.

@@ -71,7 +71,7 @@ namespace TIPS.ViewModels
 			ui.GetNewExpenseFromUser(async (editor) => {
 				if (editor.Result == PageResult.SAVE)
 				{
-					await service.AddExpense(editor.EditedExpense);
+					await service.AddSingleExpense(editor.EditedExpense);
 					_ = RefreshRecents();
 				}
 			});

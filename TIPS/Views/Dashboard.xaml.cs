@@ -27,7 +27,7 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 
 	void DashboardModel.DashboardUI.GetNewExpenseFromUser(Action<ExpenseEditorModel> callback)
 	{
-		ExpenseEditor editor = new ExpenseEditor(null);
+		ExpenseEditor editor = new ExpenseEditor(false);
 		editor.Closing += callback;
 		_ = Navigation.PushModalAsync(editor);
 	}

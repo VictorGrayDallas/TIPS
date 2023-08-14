@@ -18,6 +18,16 @@ namespace TIPS
 			Date = date;
 		}
 
+		public static Expense Copy(Expense other)
+		{
+			return new Expense(other.Date)
+			{
+				Description = other.Description,
+				Amount = other.Amount,
+				Tags = other.Tags.ToList(),
+			};
+		}
+
 		public void CopyFrom(Expense other)
 		{
 			Date = other.Date;

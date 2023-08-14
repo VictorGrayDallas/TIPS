@@ -212,7 +212,7 @@ namespace TIPS
 		/// </summary>
 		/// <returns>Returns the SQLite expense that was added (or already existed).
 		/// Use the returned Expense object for any future updates or deletes.</returns>
-		public async Task<Expense> AddExpense(Expense expense)
+		public async Task<Expense> AddSingleExpense(Expense expense)
 		{
 			if (!Initialized)
 				await Init();
@@ -220,7 +220,7 @@ namespace TIPS
 			if (expense is SQLiteExpense sqlExpense)
 			{
 				// If this expense already exists, SQLite will add a copy of it and change this instance's Id.
-				// This is not what we want, since the caller will no longer have a reference to the original course.
+				// This is not what we want, since the caller will no longer have a reference to the original expense.
 				SQLiteExpense? existingExpense = await _db!.FindAsync<SQLiteExpense>(sqlExpense.Id);
 				return existingExpense ?? await Insert(sqlExpense);
 			}
@@ -358,7 +358,7 @@ namespace TIPS
 				{
 					Expense expense = new Expense(re.Date);
 					expense.CopyFrom(re);
-					tasks.Add(AddExpense(expense));
+					tasks.Add(AddSingleExpense(expense));
 					re.MoveToNextDate();
 				}
 				tasks.Add(UpdateRecurringExpense(re));

@@ -25,6 +25,26 @@ namespace TIPS
 			FrequencyUnit = unit;
 		}
 
+		public static RecurringExpense Copy(RecurringExpense other)
+		{
+			return new RecurringExpense(other.Date, other.Frequency, other.FrequencyUnit)
+			{
+				Description = other.Description,
+				Amount = other.Amount,
+				Tags = other.Tags.ToList(),
+			};
+		}
+
+		public void CopyFrom(RecurringExpense other)
+		{
+			Date = other.Date;
+			Description = other.Description;
+			Amount = other.Amount;
+			Tags = other.Tags.ToList();
+			Frequency = other.Frequency;
+			FrequencyUnit = other.FrequencyUnit;
+		}
+
 		public void MoveToNextDate()
 		{
 			if (FrequencyUnit == FrequencyUnits.Days)

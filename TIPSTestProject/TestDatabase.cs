@@ -88,7 +88,7 @@ namespace TIPSTestProject
 			expense.Description = "testing";
 			expense.Tags.Add("tag1");
 			expense.Tags.Add("tag2");
-			await service.AddExpense(expense);
+			await service.AddSingleExpense(expense);
 
 			IEnumerable<Expense>  expenses = await service.GetExpenses();
 			assert(expenses.Count() == 1);
@@ -109,7 +109,7 @@ namespace TIPSTestProject
 			expense.Description = "testing";
 			expense.Tags.Add("tag1");
 			expense.Tags.Add("tag2");
-			expense = await service.AddExpense(expense);
+			expense = await service.AddSingleExpense(expense);
 
 			// Modify and update
 			expense.Description = "tested";
