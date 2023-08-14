@@ -1,7 +1,6 @@
 ﻿using SQLite;
 using System;
 using System.Collections.Generic;
-using TIPS;
 using TIPS.Models.SQLiteWrappers;
 
 namespace TIPS.SQLite
@@ -16,7 +15,10 @@ namespace TIPS.SQLite
 		// Properties that SQLite should replace
 		private byte[]? tagBlobGet;
 		private byte[]? tagBlobSet;
-		public new byte[] Tags {
+		[Ignore]
+		[Obsolete(SQLiteService.ErrorMessageForIgnoredFields, true)]
+		public new List<string> Tags { get => base.Tags; set => base.Tags = value; }
+		public byte[] Sql_Tags {
 			get
 			{
 				if (tagBlobGet == null)
@@ -32,8 +34,12 @@ namespace TIPS.SQLite
 
 		// SQLite does not understand DateOnly.
 		// Plus we want to index it
+		[Ignore]
+		[Obsolete(SQLiteService.ErrorMessageForIgnoredFields, true)]
+		public new DateOnly Date { get => base.Date; set => base.Date = value; }
 		[Indexed]
-		public new DateTime Date {
+		public DateTime Sql_Date
+		{
 			get => base.Date.ToDateTime(new TimeOnly(12, 0), DateTimeKind.Utc);
 			set => base.Date = DateOnly.FromDateTime(value);
 		}

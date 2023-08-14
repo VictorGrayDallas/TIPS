@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using TIPS.Models.SQLiteWrappers;
-using TIPS.SQLite;
 
 namespace TIPS.SQLite
 {
@@ -18,21 +16,30 @@ namespace TIPS.SQLite
 
 		// "Inherit" from sqlBase
 		private SQLiteExpense sqlBase;
-		public new byte[] Tags
+
+		[Ignore]
+		[Obsolete(SQLiteService.ErrorMessageForIgnoredFields, true)]
+		public new List<string> Tags { get => base.Tags; set => base.Tags = value; }
+		public byte[] Sql_Tags
 		{
-			get => sqlBase.Tags;
-			set => sqlBase.Tags = value;
+			get => sqlBase.Sql_Tags;
+			set => sqlBase.Sql_Tags = value;
 		}
+
+		[Ignore]
+		[Obsolete(SQLiteService.ErrorMessageForIgnoredFields, true)]
+		public new DateOnly Date { get => base.Date; set => base.Date = (sqlBase as Expense).Date = value; }
 		[Indexed]
-		public new DateTime Date
+		public DateTime Sql_Date
 		{
-			get => sqlBase.Date;
+			get => sqlBase.Sql_Date;
 			set
 			{
-				sqlBase.Date = value;
+				sqlBase.Sql_Date = value;
 				base.Date = (sqlBase as Expense).Date;
 			}
 		}
+
 		void ISQLiteExpense.ReceiveData(object data)
 		{
 			((ISQLiteExpense)sqlBase).ReceiveData(data);

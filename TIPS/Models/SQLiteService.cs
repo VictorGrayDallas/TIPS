@@ -11,6 +11,7 @@ using TIPS.SQLite;
 
 namespace TIPS
 {
+
 	public class SQLiteServiceException : Exception
 	{
 		public SQLiteServiceException(string message) : base(message) { }
@@ -18,6 +19,7 @@ namespace TIPS
 
 	internal class SQLiteService
 	{
+		internal const string ErrorMessageForIgnoredFields = "This property exists only as a means of dealing with reflection-based shenanagins in SQLite and MAUI bindings. Do not use it. Use the base object's property or use the Sql_ verison.";
 
 		private string dbName;
 		private SQLiteAsyncConnection? _db;
@@ -36,7 +38,8 @@ namespace TIPS
 		{
 			if (initTask != null)
 			{
-				await initTask;
+				if (initTask.Status != TaskStatus.Faulted)
+					await initTask;
 				initTask = null;
 			}
 
@@ -175,7 +178,7 @@ namespace TIPS
 				endInclusive.Value.AddDays(1).ToDateTime(new TimeOnly(0, 0), DateTimeKind.Utc);
 
 			var dbExpenses = await _db!.Table<SQLiteExpense>()
-				.Where((e) => e.Date >= begin && e.Date < end)
+				.Where((e) => e.Sql_Date >= begin && e.Sql_Date < end)
 				.ToListAsync();
 			dbExpenses.ForEach((e) => ((ISQLiteExpense)e).ReceiveData(tagNamesForBlobParsing));
 			return dbExpenses;
@@ -291,7 +294,7 @@ namespace TIPS
 				// Make sure it's UTC (SQLite's timezome) and at the start of the next day.
 				DateOnly endDateOnly = DateOnly.FromDateTime(DateTime.Today);
 				DateTime end = endDateOnly.AddDays(1).ToDateTime(new TimeOnly(0, 0), DateTimeKind.Utc);
-				query = query.Where((e) => e.Date < end);
+				query = query.Where((e) => e.Sql_Date < end);
 			}
 
 			var dbRecurringExpenses = await query.ToListAsync();
