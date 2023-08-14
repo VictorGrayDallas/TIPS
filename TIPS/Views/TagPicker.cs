@@ -103,6 +103,15 @@ namespace TIPS.Views
 		public event EventHandler<TextChangedEventArgs>? TextChanged;
 
 		public List<string> Tags { get => _tagLabels.Keys.ToList(); }
+		public void SetTags(List<string> tags)
+		{
+			_tagsLayout.Clear();
+			_tagLabels.Clear();
+			Tags.Clear();
+
+			foreach (string tag in tags)
+				AddTag(tag);
+		}
 
 		private void CreateControls()
 		{

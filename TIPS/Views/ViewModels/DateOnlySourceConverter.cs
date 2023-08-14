@@ -13,9 +13,14 @@ namespace TIPS.ViewModels
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			if (value is not DateOnly sourceDate)
-				return new DateTime(0, 0, 0);
+				throw new Exception("Expected DateOnly in DateOnlySourceConverter. Are you in debug mode?");
 
-			return sourceDate.ToDateTime(new TimeOnly(12, 0));
+			if (targetType == typeof(DateTime))
+				return sourceDate.ToDateTime(new TimeOnly(12, 0));
+			else if (targetType == typeof(string))
+				return sourceDate.ToShortDateString();
+			else
+				throw new Exception("Invalid requested type in DateOnlySourceConverter.");
 		}
 
 		public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

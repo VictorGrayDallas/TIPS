@@ -10,7 +10,7 @@ namespace TIPSTestProject
 {
 	internal class TestPlatformService : PlatformServices
 	{
-		public string AppDataPath => Path.GetTempPath();
+		public string AppDataPath => Path.Combine(Path.GetTempPath(), "TIPS");
 
 		public string DefaultDatabaseName => "test.db";
 

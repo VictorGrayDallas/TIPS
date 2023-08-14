@@ -15,13 +15,14 @@ public partial class ExpenseEditor : ContentPage, ExpenseEditorModel.ExpenseEdit
 		InitializeComponent();
 
 		model = new(toEdit, this);
-		BindingContext = model;
 
 		// Since our bindings are OneWayToSource, we have to manually set initial values.
 		amountEntry.Text = model.EditedExpense.Amount.ToString("N2");
 		dateEntry.Date = model.EditedExpense.Date.ToDateTime(new TimeOnly(12, 0));
 		descriptionEntry.Text = model.EditedExpense.Description;
 		tagEntry.ItemsSource = model.AllTags;
+		tagEntry.SetTags(model.EditedExpense.Tags);
+		BindingContext = model;
 
 		// I cannot get this to work correctly. I tried using bindings in the XAML too.
 		// The label appears in the wrong place when the page loads, but moves when I type in the tags box.
@@ -47,7 +48,5 @@ public partial class ExpenseEditor : ContentPage, ExpenseEditorModel.ExpenseEdit
 
 	internal event Action<ExpenseEditorModel>? Closing;
 
-	private void deleteExpense_Clicked(object sender, EventArgs e)
-	{
-	}
+	private void deleteExpense_Clicked(object sender, EventArgs e) => model.DeleteClicked();
 }

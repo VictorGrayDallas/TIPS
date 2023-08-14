@@ -15,6 +15,8 @@ namespace TIPS.ViewModels
 		internal interface DashboardUI
 		{
 			void GetNewExpenseFromUser(Action<ExpenseEditorModel> callback);
+
+			void GetEditedExpenseFromUser(Expense toEdit, Action<ExpenseEditorModel> callback);
 		}
 
 		public ObservableCollection<Expense> RecentExpenses { get; } = new();
@@ -56,19 +58,36 @@ namespace TIPS.ViewModels
 		public async Task RefreshRecents()
 		{
 			DateOnly today = DateOnly.FromDateTime(DateTime.Now);
-			IEnumerable<Expense> recents = (await service.GetExpenses(today.AddDays(-7)))
+			IEnumerable<Expense> recents = (await service.GetExpenses(today.AddDays(-70)))
 				.OrderByDescending((e) => e.Date)
 				.Take(3);
 			RecentExpenses.Clear();
 			foreach (Expense e in recents)
 				RecentExpenses.Add(e);
 		}
+
 		public void NewExpenseClicked()
 		{
 			ui.GetNewExpenseFromUser(async (editor) => {
 				if (editor.Result == PageResult.SAVE)
 				{
 					await service.AddExpense(editor.EditedExpense);
+					_ = RefreshRecents();
+				}
+			});
+		}
+
+		public void EditExpenseClicked(Expense toEdit)
+		{
+			ui.GetEditedExpenseFromUser(toEdit, async (editor) => {
+				if (editor.Result == PageResult.SAVE)
+				{
+					await service.UpdateExpense(editor.EditedExpense);
+					_ = RefreshRecents();
+				}
+				else if (editor.Result == PageResult.DELETE)
+				{
+					await service.DeleteExpense(editor.EditedExpense);
 					_ = RefreshRecents();
 				}
 			});

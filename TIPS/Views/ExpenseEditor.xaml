@@ -45,7 +45,6 @@
                    VerticalTextAlignment="Center"
                    Grid.Row="3" />
             <views:TagPicker x:Name="tagEntry"
-                             
                              Grid.Row="3"
                              Grid.Column="1" />
         </Grid>
