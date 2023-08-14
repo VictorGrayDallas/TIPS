@@ -16,27 +16,6 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		InitializeComponent();
 		model = new(this);
 		BindingContext = model;
-
-		new Thread(_ =>
-		{
-			_ = model.Init();
-
-			MainThread.BeginInvokeOnMainThread(() => testbutton.Text = "Init called");
-		}).Start();
-	}
-
-	void DashboardModel.DashboardUI.GetNewExpenseFromUser(Action<ExpenseEditorModel> callback)
-	{
-		ExpenseEditor editor = new ExpenseEditor(false);
-		editor.Closing += callback;
-		_ = Navigation.PushModalAsync(editor);
-	}
-
-	void DashboardModel.DashboardUI.GetEditedExpenseFromUser(Expense toEdit, Action<ExpenseEditorModel> callback)
-	{
-		ExpenseEditor editor = new ExpenseEditor(toEdit);
-		editor.Closing += callback;
-		_ = Navigation.PushModalAsync(editor);
 	}
 
 	private void viewRecentExpenses_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -45,12 +24,15 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		expenseDetailsView.IsVisible = expenseDetailsView.BindingContext != null;
 	}
 
-	private void testbutton_Clicked(object sender, EventArgs e)
+	private void viewSingleExpensesButton_Clicked(object sender, EventArgs e) => ViewExpenses(false);
+	private void viewRecurringExpensesButton_Clicked(object sender, EventArgs e) => ViewExpenses(true);
+	private void ViewExpenses(bool viewRecurring)
 	{
-		_ = model.RefreshRecents();
+		ExpensesViewer viewer = new(viewRecurring);
+		viewer.Closing += () => {
+			_ = model.RefreshRecents();
+		};
+		_ = Navigation.PushModalAsync(viewer);
+
 	}
-
-	private void newExpense_Clicked(object sender, EventArgs e) => model.NewExpenseClicked();
-
-	private void editExpense_Clicked(object sender, EventArgs e) => model.EditExpenseClicked((Expense)expenseDetailsView.BindingContext);
 }

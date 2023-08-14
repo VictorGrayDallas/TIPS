@@ -3,23 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:TIPS"
              xmlns:vms="clr-namespace:TIPS.ViewModels"
-             x:Class="TIPS.Views.Dashboard"
-             x:DataType="vms:DashboardModel"
-             Title="Dashboard">
-    <VerticalStackLayout Spacing="10"
-                         Padding="8">
-        <Label 
-            Text="Most recent expenses"
-            HorizontalOptions="Center" />
-        <CollectionView x:Name="viewRecentExpenses"
-                        ItemsSource="{Binding RecentExpenses}"
+             x:DataType="vms:ExpensesViewerModel"
+             x:Class="TIPS.Views.ExpensesViewer"
+             Title="ExpensesViewer">
+    <VerticalStackLayout Padding="6">
+        <CollectionView x:Name="expensesCollectionView"
+                        ItemsSource="{Binding ExpensesInView}"
                         Margin="20"
                         SelectionMode="Single"
-                        SelectionChanged="viewRecentExpenses_SelectionChanged">
+                        MaximumHeightRequest="700"
+                        EmptyView="Loading..."
+                        SelectionChanged="expensesCollectionView_SelectionChanged">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
             </CollectionView.ItemsLayout>
             
+
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:Expense">
                     <StackLayout>
@@ -31,6 +30,7 @@
         </CollectionView>
         <VerticalStackLayout x:Name="expenseDetailsView"
                              x:DataType="local:Expense"
+                             BindingContext="null"
                              IsVisible="false"
                              Spacing="1.6">
             <HorizontalStackLayout>
@@ -40,14 +40,16 @@
             </HorizontalStackLayout>
             <Label Text="{Binding Tags, Converter={vms:StringCollectionConverter}}" />
             <Label Text="{Binding Description}" />
+            <Label Text="{Binding Converter={vms:RecurenceConverter}}" 
+                   x:Name="recurrenceLabel" />
+            <Button Text="Edit"
+                    Clicked="editExpense_Clicked"
+                    Margin="0, 10"/>
         </VerticalStackLayout>
 
-        <Button Text="View All Expenses" 
-                x:Name="viewSingleExpensesButton"
-                Clicked="viewSingleExpensesButton_Clicked" />
+        <Button x:Name="newExpense"
+                Text="Add new expense"
+                Clicked="newExpense_Clicked" />
 
-        <Button Text="View Recurring Expenses" 
-                x:Name="viewRecurringExpensesButton"
-                Clicked="viewRecurringExpensesButton_Clicked" />
     </VerticalStackLayout>
 </ContentPage>
