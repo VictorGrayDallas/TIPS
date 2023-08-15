@@ -16,6 +16,7 @@ namespace TIPSTestProject
 
 			Assert.IsTrue(first.Amount == second.Amount);
 			Assert.IsTrue(first.Description == second.Description);
+			Assert.IsTrue(first.Date == second.Date);
 			Assert.IsTrue(first.Tags.Count == second.Tags.Count);
 			for (int i = 0; i < first.Tags.Count; i++)
 				Assert.IsTrue(first.Tags[i] == second.Tags[i]);
