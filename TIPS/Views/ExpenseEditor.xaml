@@ -25,7 +25,11 @@
                               Grid.Column="1" />
             <Label Text="Date"
                    x:Name="dateLabel"
-                   VerticalOptions="Center"
+                   BindingContext="{x:Reference Name=dateEntry}"
+                   x:DataType="Entry"
+                   HeightRequest="{Binding Path=Height, Mode=OneWay}"
+                   VerticalTextAlignment="Center"
+                   VerticalOptions="Start"
                    Grid.Row="1" />
             <VerticalStackLayout Grid.Row="1"
                                  Grid.Column="1" >
