@@ -46,8 +46,10 @@ namespace TIPS.SQLite
 
 		void ISQLiteExpense.ReceiveData(object data)
 		{
+			if (data is Dictionary<string, int>)
+				(sqlBase as Expense).Tags = base.Tags;
 			((ISQLiteExpense)sqlBase).ReceiveData(data);
-			if (data is Dictionary<int, string> idDict)
+			if (data is Dictionary<int, string>)
 				base.Tags = (sqlBase as Expense).Tags;
 		}
 
