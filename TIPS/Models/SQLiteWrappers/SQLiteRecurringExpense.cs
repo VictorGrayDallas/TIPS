@@ -28,11 +28,15 @@ namespace TIPS.SQLite
 
 		[Ignore]
 		[Obsolete(SQLiteService.ErrorMessageForIgnoredFields, true)]
-		public new DateOnly Date { get => base.Date; set => base.Date = (sqlBase as Expense).Date = value; }
+		public new DateOnly Date { get => base.Date; set => base.Date = value; }
 		[Indexed]
 		public DateTime Sql_Date
 		{
-			get => sqlBase.Sql_Date;
+			get
+			{
+				(sqlBase as Expense).Date = base.Date;
+				return sqlBase.Sql_Date;
+			}
 			set
 			{
 				sqlBase.Sql_Date = value;
