@@ -15,7 +15,7 @@ namespace TIPS.ViewModels
 					unit = unit[..(unit.Length - 1)];
 				return $"Recurrs every {re.Frequency} {unit}.";
 			}
-			else if (value is Expense || value == null)
+			else if (value is Expense || value == null || (string)value == "null") // Idk where string value "null" comes from, but it happens.
 				return "";
 			else
 				throw new Exception("RecurenceConverter expected an expense, did not get one.");
