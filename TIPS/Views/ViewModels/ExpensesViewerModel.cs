@@ -41,7 +41,7 @@ namespace TIPS.ViewModels
 				expenses = await service.GetRecurringExpenses();
 			else
 				expenses = await service.GetExpenses();
-			expenses.OrderByDescending((e) => e.Date);
+			expenses = expenses.OrderByDescending((e) => e.Date);
 
 			ExpensesInView.Clear();
 			foreach (Expense e in expenses)
