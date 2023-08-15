@@ -22,7 +22,7 @@ namespace TIPSTestProject
 		public void TestOpeningNewExpense()
 		{
 			TestUI ui = new();
-			ExpenseEditorModel model = new(null, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(false, ui, TestPlatformService.Instance);
 			assert(model.EditedExpense != null);
 			assert(model.EditedExpense!.Tags.Count == 0);
 			assert(ui.deleteButtonHidden);
@@ -32,7 +32,7 @@ namespace TIPSTestProject
 		public void TestEditingNewExpense()
 		{
 			TestUI ui = new();
-			ExpenseEditorModel model = new(null, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(false, ui, TestPlatformService.Instance);
 			model.EditedExpense!.Amount = 2.5m;
 			model.EditedExpense.Date = new DateOnly(2020, 06, 09);
 			model.EditedExpense.Description = "test";
