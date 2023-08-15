@@ -34,6 +34,9 @@
                              IsVisible="false"
                              Spacing="1.6">
             <HorizontalStackLayout>
+                <Label Text="Next occurrence: "
+                       x:Name="detailsNextOccureceLabel"
+                       IsVisible="false" />
                 <Label Text="{Binding Date, Converter={vms:DateOnlySourceConverter}}"
                        Margin="0, 0, 8, 0" />
                 <Label Text="{Binding Amount, StringFormat='{0:C}'}" />

@@ -18,6 +18,9 @@ public partial class ExpensesViewer : ContentPage, ExpensesViewerModel.ExpensesV
 
 		model = new ExpensesViewerModel(viewRecurring, this);
 		BindingContext = model;
+
+		if (viewRecurring)
+			detailsNextOccureceLabel.IsVisible = true;
 	}
 
 	public void Close()

@@ -36,6 +36,7 @@ public partial class ExpenseEditor : ContentPage, ExpenseEditorModel.ExpenseEdit
 
 		if (model.IsRecurring)
 		{
+			dateLabel.Text = "Next date";
 			frequencyEntry.Text = model.ExpenseAsRecurring!.Frequency.ToString();
 			unitPicker.ItemsSource = new RecurringExpense.FrequencyUnits[]
 			{

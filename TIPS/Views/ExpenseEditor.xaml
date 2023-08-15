@@ -24,6 +24,7 @@
                               Value="{Binding EditedExpense.Amount, Mode=OneWayToSource}"
                               Grid.Column="1" />
             <Label Text="Date"
+                   x:Name="dateLabel"
                    VerticalOptions="Center"
                    Grid.Row="1" />
             <VerticalStackLayout Grid.Row="1"
