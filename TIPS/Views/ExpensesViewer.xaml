@@ -22,7 +22,7 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:Expense">
                     <StackLayout>
-                        <Label Text="{Binding Amount}" FontSize="20"/>
+                        <Label Text="{Binding Amount, StringFormat='{0:C}'}" FontSize="20"/>
                         <Label Text="{Binding Description}" />
                     </StackLayout>
                 </DataTemplate>
