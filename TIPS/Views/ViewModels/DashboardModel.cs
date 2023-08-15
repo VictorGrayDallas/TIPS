@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace TIPS.ViewModels
 {
@@ -45,9 +46,22 @@ namespace TIPS.ViewModels
 				return;
 			initStarted = true;
 
-			string filename = Path.Combine(platformServices.AppDataPath, platformServices.DefaultDatabaseName);
-			service = platformServices.GetSQLiteService(filename);
-			await RefreshRecents();
+			service = platformServices.GetSQLiteService();
+
+			await service.ProcessRecurringExpenses();
+			_ = RefreshRecents();
+
+			// Set up timer to automatically process recurring expenses every day.
+			DateTime tomorrow = DateTime.Now.AddDays(1).Date;
+			Timer timer = new Timer(tomorrow.AddSeconds(1).Subtract(DateTime.Now));
+			timer.Enabled = true;
+			timer.Elapsed += async (s, e) =>
+			{
+				DateTime tomorrow = DateTime.Now.AddDays(1).Date;
+				(s as Timer)!.Interval = tomorrow.AddSeconds(1).Subtract(DateTime.Now).TotalMicroseconds;
+				await service.ProcessRecurringExpenses();
+				_ = RefreshRecents();
+			};
 
 			inited = true;
 		}
