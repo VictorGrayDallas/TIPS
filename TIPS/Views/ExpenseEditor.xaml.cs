@@ -54,6 +54,23 @@ public partial class ExpenseEditor : ContentPage, ExpenseEditorModel.ExpenseEdit
 
 		BindingContext = model;
 
+		// It's so sad that there doesn't seem to be a way to do this in XAML.
+		triggerWarningLayout.PropertyChanged += (s, e) =>
+		{
+			if (e.PropertyName == nameof(HorizontalStackLayout.IsVisible))
+			{
+				// Initial estimates. Cannot reference actual sizes of not-yet-rendered views.
+				triggerWarningLabel.WidthRequest = dateEntry.Width - tagsLabel.Height;
+				triggerWarningImage.HeightRequest = dateEntry.Height;
+			}
+		};
+		triggerWarningLabel.SizeChanged += (s, e) =>
+		{
+			// Real sizes. (Yes, it's possible this gets called multiple times.)
+			triggerWarningLabel.WidthRequest = Math.Max(dateEntry.Width - triggerWarningImage.Width, triggerWarningLabel.MinimumWidthRequest);
+			triggerWarningImage.HeightRequest = Math.Min(triggerWarningLabel.Height, triggerWarningImage.MaximumHeightRequest);
+		};
+
 		// I cannot get this to work correctly. I tried using bindings in the XAML too.
 		// The label appears in the wrong place when the page loads, but moves when I type in the tags box.
 		//descriptionEntry.SizeChanged += (s, e) =>
@@ -79,4 +96,6 @@ public partial class ExpenseEditor : ContentPage, ExpenseEditorModel.ExpenseEdit
 	internal event Action<ExpenseEditorModel>? Closing;
 
 	private void deleteExpense_Clicked(object sender, EventArgs e) => model.DeleteClicked();
+
+	private void dateEntry_DateSelected(object sender, DateChangedEventArgs e) => model.DateChanged();
 }

@@ -44,6 +44,20 @@ namespace TIPS.ViewModels
 		public bool IsRecurring { get => EditedExpense is RecurringExpense; }
 		public RecurringExpense? ExpenseAsRecurring { get => EditedExpense as RecurringExpense; }
 
+		private bool _wasRecurringTrigger = false;
+		public bool RecurringWillTriggerOnSave
+		{
+			get => IsRecurring && EditedExpense.Date <= DateOnly.FromDateTime(DateTime.Today);
+		}
+		public void DateChanged()
+		{
+			if (RecurringWillTriggerOnSave != _wasRecurringTrigger)
+			{
+				_wasRecurringTrigger = RecurringWillTriggerOnSave;
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RecurringWillTriggerOnSave)));
+			}
+		}
+
 
 		private Expense? originalExpense { get; }
 

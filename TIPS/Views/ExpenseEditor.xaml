@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maui="clr-namespace:Microsoft.Maui.Controls;assembly=Microsoft.Maui.Controls"
              xmlns:views="clr-namespace:TIPS.Views"
              xmlns:vms="clr-namespace:TIPS.ViewModels"
              xmlns:local="clr-namespace:TIPS"
@@ -25,18 +26,33 @@
             <Label Text="Date"
                    VerticalOptions="Center"
                    Grid.Row="1" />
-            <DatePicker x:Name="dateEntry"
-                        Date="{Binding EditedExpense.Date, Mode=OneWayToSource, Converter={vms:DateOnlySourceConverter}}"
-                        Grid.Row="1"
-                        Grid.Column="1" />
+            <VerticalStackLayout Grid.Row="1"
+                                 Grid.Column="1" >
+                <DatePicker x:Name="dateEntry"
+                            Date="{Binding EditedExpense.Date, Mode=OneWayToSource, Converter={vms:DateOnlySourceConverter}}"
+                            DateSelected="dateEntry_DateSelected"/>
+                <HorizontalStackLayout IsVisible="{Binding RecurringWillTriggerOnSave}"
+                                       x:Name="triggerWarningLayout" >
+                    <Image Source="plain_warning.png"
+                           x:Name="triggerWarningImage"
+                           Margin="0, 0, 6, 0"
+                           MaximumHeightRequest="100"
+                           Scale="0.85"
+                           VerticalOptions="Start" />
+                    <Label Text="The recurring expense will trigger immediately upon saving, because the date is today or is in the past."
+                           MinimumWidthRequest="70"
+                           VerticalOptions="Start"
+                           x:Name="triggerWarningLabel" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
             <Label Text="Description"
                    VerticalOptions="Center"
                    Grid.Row="2" />
-            <Entry x:Name="descriptionEntry"
-                   Text="{Binding EditedExpense.Description, Mode=OneWayToSource}"
-                   Placeholder="Description"
-                   Grid.Row="2"
-                   Grid.Column="1" />
+                <Entry x:Name="descriptionEntry"
+                       Text="{Binding EditedExpense.Description, Mode=OneWayToSource}"
+                       Placeholder="Description"
+                       Grid.Row="2"
+                       Grid.Column="1" />
             <Label Text="Tag(s)"
                    x:Name="tagsLabel"
                    VerticalOptions="Start"

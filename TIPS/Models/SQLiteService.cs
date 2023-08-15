@@ -347,22 +347,27 @@ namespace TIPS
 				throw new SQLiteServiceException("Attempted to update a recurring expense that isn't a SQLite database recurring expense. Use an instance that was returned by a Get or Add method.");
 		}
 
+		public async Task ProcessRecurringExpense(RecurringExpense expense)
+		{
+			List<Task> tasks = new();
+			while (expense.Date <= DateOnly.FromDateTime(DateTime.Today))
+			{
+				Expense concrete = new Expense(expense.Date);
+				concrete.CopyFrom(expense);
+				tasks.Add(AddSingleExpense(concrete));
+				expense.MoveToNextDate();
+			}
+			tasks.Add(UpdateRecurringExpense(expense));
+			foreach (Task t in tasks)
+				await t;
+		}
 		public async Task ProcessRecurringExpenses()
 		{
 			List<Task> tasks = new();
 
 			IEnumerable<RecurringExpense> recurringExpenses = await GetRecurringExpenses(true);
 			foreach (RecurringExpense re in recurringExpenses)
-			{
-				while (re.Date <= DateOnly.FromDateTime(DateTime.Today))
-				{
-					Expense expense = new Expense(re.Date);
-					expense.CopyFrom(re);
-					tasks.Add(AddSingleExpense(expense));
-					re.MoveToNextDate();
-				}
-				tasks.Add(UpdateRecurringExpense(re));
-			}
+				tasks.Add(ProcessRecurringExpense(re));
 
 			foreach (Task t in tasks)
 				await t;

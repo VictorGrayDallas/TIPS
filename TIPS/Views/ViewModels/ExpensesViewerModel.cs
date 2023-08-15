@@ -55,7 +55,11 @@ namespace TIPS.ViewModels
 			if (editor.Result == PageResult.SAVE)
 			{
 				if (viewingRecurring)
-					await service.AddRecurringExpense((RecurringExpense)editor.EditedExpense);
+				{
+					await service.AddRecurringExpense(editor.ExpenseAsRecurring!);
+					_ = service.ProcessRecurringExpense(editor.ExpenseAsRecurring!);
+					_ = RefreshList();
+				}
 				else
 					await service.AddSingleExpense(editor.EditedExpense);
 				_ = RefreshList();
@@ -67,6 +71,8 @@ namespace TIPS.ViewModels
 			if (editor.Result == PageResult.SAVE)
 			{
 				await service.UpdateExpense(editor.EditedExpense);
+				if (editor.IsRecurring)
+					_ = service.ProcessRecurringExpense(editor.ExpenseAsRecurring!);
 				_ = RefreshList();
 			}
 			else if (editor.Result == PageResult.DELETE)
