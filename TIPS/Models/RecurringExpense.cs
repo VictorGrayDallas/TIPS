@@ -35,14 +35,14 @@ namespace TIPS
 			};
 		}
 
-		public void CopyFrom(RecurringExpense other)
+		public override void CopyFrom(Expense other)
 		{
-			Date = other.Date;
-			Description = other.Description;
-			Amount = other.Amount;
-			Tags = other.Tags.ToList();
-			Frequency = other.Frequency;
-			FrequencyUnit = other.FrequencyUnit;
+			base.CopyFrom(other);
+			if (other is RecurringExpense ro)
+			{
+				Frequency = ro.Frequency;
+				FrequencyUnit = ro.FrequencyUnit;
+			}
 		}
 
 		public void MoveToNextDate()

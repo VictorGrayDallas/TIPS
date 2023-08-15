@@ -28,7 +28,7 @@ namespace TIPS
 			};
 		}
 
-		public void CopyFrom(Expense other)
+		public virtual void CopyFrom(Expense other)
 		{
 			Date = other.Date;
 			Description = other.Description;

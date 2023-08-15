@@ -61,7 +61,7 @@
                 </Entry>
                 <Picker x:Name="unitPicker"
                         Grid.Column="1"
-                        SelectedIndex="{Binding ExpenseAsRecurring.FrequencyUnit, Mode=OneWayToSource}" />
+                        SelectedItem="{Binding ExpenseAsRecurring.FrequencyUnit, Mode=OneWayToSource}" />
             </Grid>
         </Grid>
                 
