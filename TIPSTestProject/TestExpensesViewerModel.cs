@@ -33,6 +33,9 @@ namespace TIPSTestProject
 		private static List<Expense> expenses = new();
 		private static List<RecurringExpense> recurringExpenses = new();
 
+		// Just in case we hit midnight mid-test.
+		private static DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
 		public TestExpensesViewerModel() { }
 
 		[ClassInitialize]
@@ -43,7 +46,7 @@ namespace TIPSTestProject
 			if (File.Exists(testDbName))
 				File.Delete(testDbName);
 
-			Expense expense1 = new Expense(DateOnly.FromDateTime(DateTime.Now))
+			Expense expense1 = new Expense(today)
 			{
 				Amount = 2.25m,
 				Description = "Testing things",
@@ -54,9 +57,11 @@ namespace TIPSTestProject
 				},
 			};
 			Expense expense2 = Expense.Copy(expense1);
+			expense2.Description = "asdf";
 			expense2.Date = expense2.Date.AddDays(1);
 			expense2.Amount = 3m;
 			Expense expense3 = Expense.Copy(expense1);
+			expense3.Amount = 9.99m;
 			expense3.Date = expense3.Date.AddMonths(-2);
 			expense3.Tags.RemoveAt(1);
 
@@ -171,5 +176,81 @@ namespace TIPSTestProject
 			original.Amount = expenses[1].Amount;
 			expenses[1] = await service.GetSQLiteService().AddSingleExpense(original);
 		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public async Task TestFilterDates()
+		{
+			TestUI ui = new();
+			ExpensesViewerModel model = new(false, ui, service);
+			await ui.WaitUntilRefresh();
+
+			await model.Filter(new ExpensesViewerModel.FilterOptions()
+			{
+				MinDate = today.AddDays(-10),
+				MaxDate = today,
+			});
+			await ui.WaitUntilRefresh();
+
+			assert(model.ExpensesInView.Count == 1);
+			TIPSAssert.AssertExpensesMatch(model.ExpensesInView[0], expenses[0]);
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public async Task TestFilterAmounts()
+		{
+			TestUI ui = new();
+			ExpensesViewerModel model = new(false, ui, service);
+			await ui.WaitUntilRefresh();
+
+			await model.Filter(new ExpensesViewerModel.FilterOptions()
+			{
+				MinAmount = 2.5m,
+				MaxAmount = 5m,
+			});
+			await ui.WaitUntilRefresh();
+
+			assert(model.ExpensesInView.Count == 1);
+			TIPSAssert.AssertExpensesMatch(model.ExpensesInView[0], expenses[1]);
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public async Task TestFilterDescription()
+		{
+			TestUI ui = new();
+			ExpensesViewerModel model = new(false, ui, service);
+			await ui.WaitUntilRefresh();
+
+			await model.Filter(new ExpensesViewerModel.FilterOptions()
+			{
+				TextFilter = "asd",
+			});
+			await ui.WaitUntilRefresh();
+
+			assert(model.ExpensesInView.Count == 1);
+			TIPSAssert.AssertExpensesMatch(model.ExpensesInView[0], expenses[1]);
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public async Task TestFilterTags()
+		{
+			TestUI ui = new();
+			ExpensesViewerModel model = new(false, ui, service);
+			await ui.WaitUntilRefresh();
+
+			await model.Filter(new ExpensesViewerModel.FilterOptions()
+			{
+				Tags = new List<string>() { "tag2" },
+			});
+			await ui.WaitUntilRefresh();
+
+			assert(model.ExpensesInView.Count == 2);
+			TIPSAssert.AssertExpensesMatch(model.ExpensesInView[0], expenses[1]);
+			TIPSAssert.AssertExpensesMatch(model.ExpensesInView[1], expenses[0]);
+		}
+
 	}
 }

@@ -172,6 +172,8 @@ namespace TIPS
 			if (AllTags == null)
 				await LoadTags();
 
+			if (endInclusive == DateOnly.MaxValue) // Ensure AddDays won't throw an exception
+				endInclusive = endInclusive.Value.AddDays(-1);
 			DateTime begin = beginInclusive == null ? DateTime.MinValue :
 				beginInclusive.Value.ToDateTime(new TimeOnly(0, 0), DateTimeKind.Utc);
 			DateTime end = endInclusive == null ? DateTime.MaxValue :
