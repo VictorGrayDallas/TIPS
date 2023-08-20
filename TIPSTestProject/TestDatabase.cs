@@ -9,12 +9,15 @@ namespace TIPSTestProject
 	[TestClass]
 	public class TestDatabase : BasicAssert
 	{
-		private string testDbName = Path.Combine(TestPlatformService.Instance.AppDataPath, TestPlatformService.Instance.DefaultDatabaseName);
+		private string testDbName;
 		private SQLiteService service;
 
 		// Constructor runs once for EACH test.
 		public TestDatabase()
 		{
+			TestPlatformService platformService = new("testdatabase.db");
+			testDbName = Path.Combine(platformService.AppDataPath, platformService.DefaultDatabaseName);
+
 			if (File.Exists(testDbName))
 				File.Delete(testDbName);
 			service = new(testDbName);

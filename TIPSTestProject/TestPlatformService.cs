@@ -12,7 +12,7 @@ namespace TIPSTestProject
 	{
 		public string AppDataPath => Path.Combine(Path.GetTempPath(), "TIPS");
 
-		public string DefaultDatabaseName => "test.db";
+		public string DefaultDatabaseName { get; private set; }
 
 		private SQLiteService defaultService;
 		public SQLiteService GetSQLiteService(string? filename = null)
@@ -23,9 +23,9 @@ namespace TIPSTestProject
 				throw new NotImplementedException();
 		}
 
-		private TestPlatformService() {
-			defaultService = new(Path.Combine(AppDataPath, DefaultDatabaseName));
+		public TestPlatformService(string dbName) {
+			DefaultDatabaseName = dbName;
+			defaultService = new(Path.Combine(AppDataPath, dbName));
 		}
-		public static TestPlatformService Instance = new();
 	}
 }

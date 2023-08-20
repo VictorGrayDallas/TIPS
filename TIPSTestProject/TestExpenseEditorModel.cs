@@ -6,7 +6,7 @@ namespace TIPSTestProject
 	[TestClass]
 	public class TestExpenseEditorModel : BasicAssert
 	{
-		private class TestUI : ExpenseEditorModel.ExpenseEditorUI
+		internal class TestUI : ExpenseEditorModel.ExpenseEditorUI
 		{
 			public bool isClosed = false;
 			public void Close() => isClosed = true;
@@ -18,11 +18,13 @@ namespace TIPSTestProject
 			public void HideDeleteButton() => deleteButtonHidden = true;
 		}
 
+		private string dbName = "expenseeditormodel.db";
+
 		[TestMethod]
 		public void TestOpeningNewExpense()
 		{
 			TestUI ui = new();
-			ExpenseEditorModel model = new(false, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(false, ui, new TestPlatformService(dbName));
 			assert(model.EditedExpense != null);
 			assert(model.EditedExpense!.Tags.Count == 0);
 			assert(ui.deleteButtonHidden);
@@ -32,7 +34,7 @@ namespace TIPSTestProject
 		public void TestEditingNewExpense()
 		{
 			TestUI ui = new();
-			ExpenseEditorModel model = new(false, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(false, ui, new TestPlatformService(dbName));
 			model.EditedExpense!.Amount = 2.5m;
 			model.EditedExpense.Date = new DateOnly(2020, 06, 09);
 			model.EditedExpense.Description = "test";
@@ -63,7 +65,7 @@ namespace TIPSTestProject
 				Description = "toy",
 				Tags = new List<string>() { "fun things" },
 			};
-			ExpenseEditorModel model = new(expense, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(expense, ui, new TestPlatformService(dbName));
 			assert(!ui.deleteButtonHidden);
 			assert(model.EditedExpense != null);
 			TIPSAssert.AssertExpensesMatch(expense, model.EditedExpense!);
@@ -79,7 +81,7 @@ namespace TIPSTestProject
 				Description = "toy",
 				Tags = new List<string>() { "fun things" },
 			};
-			ExpenseEditorModel model = new(expense, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(expense, ui, new TestPlatformService(dbName));
 			model.EditedExpense!.Amount = 2.5m;
 			model.EditedExpense.Date = new DateOnly(2020, 06, 09);
 			model.EditedExpense.Description = "test";
@@ -115,7 +117,7 @@ namespace TIPSTestProject
 			Expense original = new Expense(new DateOnly());
 			original.CopyFrom(expense);
 
-			ExpenseEditorModel model = new(expense, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(expense, ui, new TestPlatformService(dbName));
 			model.EditedExpense!.Amount = 2.5m;
 			model.EditedExpense.Date = new DateOnly(2020, 06, 09);
 			model.EditedExpense.Description = "test";
@@ -144,7 +146,7 @@ namespace TIPSTestProject
 			Expense original = new Expense(new DateOnly());
 			original.CopyFrom(expense);
 
-			ExpenseEditorModel model = new(expense, ui, TestPlatformService.Instance);
+			ExpenseEditorModel model = new(expense, ui, new TestPlatformService(dbName));
 			model.EditedExpense!.Amount = 2.5m;
 			model.EditedExpense.Date = new DateOnly(2020, 06, 09);
 			model.EditedExpense.Description = "test";
