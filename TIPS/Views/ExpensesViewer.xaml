@@ -3,10 +3,75 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:TIPS"
              xmlns:vms="clr-namespace:TIPS.ViewModels"
+             xmlns:views="clr-namespace:TIPS.Views"
              x:DataType="vms:ExpensesViewerModel"
              x:Class="TIPS.Views.ExpensesViewer"
-             Title="ExpensesViewer">
+             Title="View Expenses">
     <VerticalStackLayout Padding="6">
+        <Label Text="Expenses"
+               x:Name="titleLabel"
+               HorizontalOptions="Center"
+               Margin="8"
+               FontSize="Title" />
+        <!-- Filtering options -->
+        <HorizontalStackLayout>
+            <Button Text="Show Filters"
+                    x:Name="filterButton"
+                    Clicked="filter_Clicked" />
+            <Label Text="{Binding ExpensesInView.Count, StringFormat='Showing {0} expenses.'}"
+                   Margin="10, 0, 0, 0"
+                   VerticalOptions="Center" />
+        </HorizontalStackLayout>
+        <Grid x:Name="filterGrid"
+              IsVisible="false"
+              ColumnSpacing="3"
+              RowDefinitions="Auto, Auto, Auto, Auto, Auto"
+              ColumnDefinitions="Auto, Auto, 1*, Auto, 1*" >
+            <Label Text="Amount"
+                   VerticalOptions="Center"/>
+            <Label Text="Min" VerticalOptions="Center" Grid.Row="0" Grid.Column="1" />
+            <views:MoneyEntry x:Name="minAmountEntry"
+                              Placeholder="Minimum Amount"
+                              Grid.Column="2" />
+            <Label Text="Max" VerticalOptions="Center" Grid.Row="0" Grid.Column="3" />
+            <views:MoneyEntry x:Name="maxAmountEntry"
+                              Placeholder="Maximum Amount"
+                              Grid.Column="4" />
+            <Label Text="Date"
+                   VerticalOptions="Center"
+                   Grid.Row="1" />
+            <Label Text="Min" VerticalOptions="Center" Grid.Row="1" Grid.Column="1" />
+            <DatePicker x:Name="minDateEntry"
+                        Grid.Row="1" Grid.Column="2" />
+            <Label Text="Max" VerticalOptions="Center" Grid.Row="1" Grid.Column="3" />
+            <DatePicker x:Name="maxDateEntry"
+                        HorizontalOptions="Fill"
+                        Grid.Row="1" Grid.Column="4" />
+            <Label Text="Description"
+                   VerticalOptions="Center"
+                   Grid.Row="2" />
+            <Entry x:Name="textFilterEntry"
+                   Placeholder="Description"
+                   Grid.Row="2"
+                   Grid.Column="1"
+                   Grid.ColumnSpan="4" />
+            <Label Text="Tag(s)"
+                   x:Name="tagsLabel"
+                   VerticalOptions="Start"
+                   BindingContext="{x:Reference Name=descriptionEntry}"
+                   x:DataType="Entry"
+                   HeightRequest="{Binding Path=Height, Mode=OneWay}"
+                   VerticalTextAlignment="Center"
+                   Grid.Row="3" />
+            <views:TagPicker x:Name="tagFilterEntry"
+                             Grid.Row="3"
+                             Grid.Column="1"
+                             Grid.ColumnSpan="4" />
+            <Button Text="Apply Filters"
+                    Clicked="applyFilters_Clicked"
+                    Grid.Row="4" />
+        </Grid>
+        <!-- List of expenses -->
         <CollectionView x:Name="expensesCollectionView"
                         ItemsSource="{Binding ExpensesInView}"
                         Margin="20"
@@ -28,6 +93,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        <!-- Details of selected expense -->
         <VerticalStackLayout x:Name="expenseDetailsView"
                              x:DataType="local:Expense"
                              BindingContext="null"

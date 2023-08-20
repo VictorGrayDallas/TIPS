@@ -36,6 +36,8 @@ namespace TIPS.ViewModels
 		public ObservableCollection<Expense> ExpensesInView { get; set; } = new();
 		private bool viewingRecurring;
 
+		public IEnumerable<string> AllTags { get => DefaultPlatformService.Instance.GetSQLiteService().GetAllTags().Result; }
+
 		private SQLiteService service;
 
 		public ExpensesViewerModel(bool viewRecurring, ExpensesViewerUI ui, PlatformServices? platformServices = null)
