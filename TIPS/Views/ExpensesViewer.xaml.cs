@@ -45,7 +45,7 @@ public partial class ExpensesViewer : ContentPage, ExpensesViewerModel.ExpensesV
 
 	private void newExpense_Clicked(object sender, EventArgs e)
 	{
-		ExpenseEditor editor = new ExpenseEditor(true);
+		ExpenseEditor editor = new ExpenseEditor(model.ViewingRecurring);
 		editor.Closing += model.HandleNewExpense;
 		_ = Navigation.PushModalAsync(editor);
 	}

@@ -35,6 +35,7 @@ namespace TIPS.ViewModels
 		private FilterOptions filter;
 		public ObservableCollection<Expense> ExpensesInView { get; set; } = new();
 		private bool viewingRecurring;
+		public bool ViewingRecurring { get => viewingRecurring; }
 
 		public IEnumerable<string> AllTags { get => DefaultPlatformService.Instance.GetSQLiteService().GetAllTags().Result; }
 
