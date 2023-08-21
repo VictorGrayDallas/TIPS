@@ -181,6 +181,7 @@ namespace TIPS
 
 			var dbExpenses = await _db!.Table<SQLiteExpense>()
 				.Where((e) => e.Sql_Date >= begin && e.Sql_Date < end)
+				.OrderByDescending((e) => e.Id)
 				.ToListAsync();
 			dbExpenses.ForEach((e) => ((ISQLiteExpense)e).ReceiveData(tagNamesForBlobParsing));
 			return dbExpenses;
