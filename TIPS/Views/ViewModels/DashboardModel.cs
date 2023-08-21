@@ -76,5 +76,21 @@ namespace TIPS.ViewModels
 			foreach (Expense e in recents)
 				RecentExpenses.Add(e);
 		}
+
+		public async void HandleEditedExpense(ExpenseEditorModel editor)
+		{
+			if (editor.Result == PageResult.SAVE)
+			{
+				await service.UpdateExpense(editor.EditedExpense);
+				if (editor.IsRecurring)
+					_ = service.ProcessRecurringExpense(editor.ExpenseAsRecurring!);
+				_ = RefreshRecents();
+			}
+			else if (editor.Result == PageResult.DELETE)
+			{
+				await service.DeleteExpense(editor.EditedExpense);
+				_ = RefreshRecents();
+			}
+		}
 	}
 }
