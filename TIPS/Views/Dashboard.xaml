@@ -2,69 +2,82 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:TIPS"
+             xmlns:views="clr-namespace:TIPS.Views"
              xmlns:vms="clr-namespace:TIPS.ViewModels"
              x:Class="TIPS.Views.Dashboard"
              x:DataType="vms:DashboardModel"
              Title="Dashboard">
-    <VerticalStackLayout Spacing="10"
-                         Padding="8">
-        <Label Text="Most recent expenses"
-               x:Name="aLabelWithDefaultFontSize"
-               HorizontalOptions="Center" />
-        <CollectionView x:Name="viewRecentExpenses"
-                        ItemsSource="{Binding RecentExpenses}"
-                        Margin="20"
-                        SelectionMode="Single"
-                        SelectionChanged="viewRecentExpenses_SelectionChanged">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="15" />
-            </CollectionView.ItemsLayout>
+    <!-- Grid because MAUI's layout options suck -->
+    <Grid RowDefinitions="Auto, *">
+        <VerticalStackLayout Spacing="10"
+                             Padding="8"
+                             x:Name="reportsLayout" >
+            <Label Text="Most recent expenses"
+                   x:Name="aLabelWithDefaultFontSize"
+                   HorizontalOptions="Center" />
+            <CollectionView x:Name="viewRecentExpenses"
+                            ItemsSource="{Binding RecentExpenses}"
+                            Margin="20"
+                            SelectionMode="Single"
+                            SelectionChanged="viewRecentExpenses_SelectionChanged">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="15" />
+                </CollectionView.ItemsLayout>
             
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="local:Expense">
-                    <!-- Ideally the MaximumWidthRequest would be relative to font size, but I cannot figure out a reasonable way to do that. -->
-                    <VerticalStackLayout MaximumWidthRequest="160">
-                        <Label Text="{Binding Amount, StringFormat='{0:C}'}" FontSize="20" />
-                        <Label Text="{Binding Description}"
-                               MaxLines="2" />
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-        <Grid x:Name="expenseDetailsGrid"
-              ColumnDefinitions="Auto, Auto"
-              RowDefinitions="Auto"
-              ColumnSpacing="20"
-              IsVisible="false"
-              HorizontalOptions="Fill" >
-            <!-- MaximumWidthRequest set in code, WidthRequest is unset in code -->
-            <VerticalStackLayout x:Name="expenseDetailsStack"
-                                 x:DataType="local:Expense"
-                                 WidthRequest="150"
-                                 MaximumWidthRequest="9999"
-                                 Spacing="1.6">
-                <HorizontalStackLayout>
-                    <Label Text="{Binding Date, Converter={vms:DateOnlySourceConverter}}"
-                           Margin="0, 0, 8, 0" />
-                    <Label Text="{Binding Amount, StringFormat='{0:C}'}" />
-                </HorizontalStackLayout>
-                <Label Text="{Binding Tags, Converter={vms:StringCollectionConverter}}" />
-                <Label Text="{Binding Description}" />
-            </VerticalStackLayout>
-            <Button Text="Edit"
-                    x:Name="editButton"
-                    VerticalOptions="Start"
-                    HorizontalOptions="Start"
-                    Grid.Column="1"
-                    Clicked="editExpense_Clicked" />
-        </Grid>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="local:Expense">
+                        <!-- Ideally the MaximumWidthRequest would be relative to font size, but I cannot figure out a reasonable way to do that. -->
+                        <VerticalStackLayout MaximumWidthRequest="160">
+                            <Label Text="{Binding Amount, StringFormat='{0:C}'}" FontSize="20" />
+                            <Label Text="{Binding Description}"
+                                   MaxLines="2" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Grid x:Name="expenseDetailsGrid"
+                  ColumnDefinitions="Auto, Auto"
+                  RowDefinitions="Auto"
+                  ColumnSpacing="20"
+                  IsVisible="false"
+                  HorizontalOptions="Fill" >
+                <!-- MaximumWidthRequest set in code, WidthRequest is unset in code -->
+                <VerticalStackLayout x:Name="expenseDetailsStack"
+                                     x:DataType="local:Expense"
+                                     WidthRequest="150"
+                                     MaximumWidthRequest="9999"
+                                     Spacing="1.6">
+                    <HorizontalStackLayout>
+                        <Label Text="{Binding Date, Converter={vms:DateOnlySourceConverter}}"
+                               Margin="0, 0, 8, 0" />
+                        <Label Text="{Binding Amount, StringFormat='{0:C}'}" />
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding Tags, Converter={vms:StringCollectionConverter}}" />
+                    <Label Text="{Binding Description}" />
+                </VerticalStackLayout>
+                <Button Text="Edit"
+                        x:Name="editButton"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Start"
+                        Grid.Column="1"
+                        Clicked="editExpense_Clicked" />
+            </Grid>
 
-        <Button Text="View All Expenses" 
-                x:Name="viewSingleExpensesButton"
-                Clicked="viewSingleExpensesButton_Clicked" />
+            <Button Text="Add New Expense"
+                    Clicked="newExpense_Clicked" />
 
-        <Button Text="View Recurring Expenses" 
-                x:Name="viewRecurringExpensesButton"
-                Clicked="viewRecurringExpensesButton_Clicked" />
-    </VerticalStackLayout>
+        </VerticalStackLayout>
+        <VerticalStackLayout Spacing="10"
+                             Padding="8"
+                             VerticalOptions="End"
+                             Grid.Row="1" >
+            <Button Text="View All Expenses" 
+                    x:Name="viewSingleExpensesButton"
+                    Clicked="viewSingleExpensesButton_Clicked" />
+
+            <Button Text="View Recurring Expenses" 
+                    x:Name="viewRecurringExpensesButton"
+                    Clicked="viewRecurringExpensesButton_Clicked" />
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>

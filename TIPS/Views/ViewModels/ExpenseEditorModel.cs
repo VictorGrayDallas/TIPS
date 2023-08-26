@@ -37,7 +37,7 @@ namespace TIPS.ViewModels
 		}
 		public bool NotNew { get => !IsNew; }
 
-		public IEnumerable<string> AllTags { get => DefaultPlatformService.Instance.GetSQLiteService().GetAllTags().Result; }
+		public IEnumerable<string> AllTags { get => platformServices.GetSQLiteService().GetAllTags().Result; }
 
 		public Expense EditedExpense { get; set; }
 

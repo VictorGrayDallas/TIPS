@@ -92,5 +92,14 @@ namespace TIPS.ViewModels
 				_ = RefreshRecents();
 			}
 		}
+
+		public async void HandleNewExpense(ExpenseEditorModel editor)
+		{
+			if (editor.Result == PageResult.SAVE)
+			{
+				await service.AddSingleExpense(editor.EditedExpense);
+				_ = RefreshRecents();
+			}
+		}
 	}
 }

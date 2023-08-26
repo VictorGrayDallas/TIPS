@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TIPS
 {
-	internal class RecurringExpense : Expense
+	public class RecurringExpense : Expense
 	{
 		public enum FrequencyUnits
 		{

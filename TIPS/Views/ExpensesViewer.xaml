@@ -58,7 +58,7 @@
             <Label Text="Tag(s)"
                    x:Name="tagsLabel"
                    VerticalOptions="Start"
-                   BindingContext="{x:Reference Name=descriptionEntry}"
+                   BindingContext="{x:Reference Name=textFilterEntry}"
                    x:DataType="Entry"
                    HeightRequest="{Binding Path=Height, Mode=OneWay}"
                    VerticalTextAlignment="Center"

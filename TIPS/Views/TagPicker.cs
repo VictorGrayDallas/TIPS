@@ -100,6 +100,7 @@ namespace TIPS.Views
 		private bool ShouldShowListView { get => _listView.ItemsSource != null && (_listView.ItemsSource as IEnumerable<string>)!.Any(); }
 
 		public event EventHandler<string>? TagAdded;
+		public event EventHandler<string>? TagRemoved;
 		public event EventHandler<TextChangedEventArgs>? TextChanged;
 
 		public List<string> Tags { get => _tagLabels.Keys.ToList(); }
@@ -237,6 +238,8 @@ namespace TIPS.Views
 
 			_tagsLayout.Remove(_tagLabels[tagName]);
 			_tagLabels.Remove(tagName);
+
+			TagRemoved?.Invoke(this, tagName);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using System;
+using System.Collections.Generic;
 using TIPS.ViewModels;
 
 namespace TIPS.Views;
@@ -9,6 +10,7 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 {
 	private DashboardModel model;
 	private bool firstAppearance;
+	private List<ReportView> reports;
 
 	public Dashboard()
 	{
@@ -17,6 +19,38 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		firstAppearance = true;
 		model = new(this);
 		BindingContext = model;
+
+		// We'll need to load user data for what reports they want
+		List<ReportSettings> reportSettings = new() { new ReportSettings()
+		{
+			Title = "Report",
+			Columns = new List<ReportColumn>()
+			{
+				new ReportColumn() {
+					Header = "Month to date",
+					IsRolling = false,
+				},
+				new ReportColumn() {
+					Header = "Past month",
+					IsRolling = true,
+					NumForAverage = 1,
+				},
+				new ReportColumn() {
+					Header = "Average over 12 months",
+					IsRolling = true,
+					NumForAverage = 12,
+				},
+			}
+		} };
+		reports = new();
+		// And make the report views.
+		foreach (var rs in reportSettings)
+		{
+			ReportView report = new ReportView(rs);
+			report.EditClicked += editReport_Clicked;
+			reports.Add(report);
+			reportsLayout.Add(report);
+		}
 
 		// It's so sad that there doesn't seem to be a way to do this in XAML.
 		// We're making it so that the label in column 0 cannot squeeze column 1 smaller than its contents want to be.
@@ -39,7 +73,11 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		base.OnAppearing();
 
 		if (!firstAppearance)
+		{
 			_ = model.RefreshRecents();
+			foreach (ReportView report in reports)
+				report.RefreshData();
+		}
 		firstAppearance = false;
 	}
 
@@ -65,6 +103,31 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 	{
 		ExpenseEditor editor = new ExpenseEditor((Expense)expenseDetailsGrid.BindingContext);
 		editor.Closing += model.HandleEditedExpense;
+		_ = Navigation.PushModalAsync(editor);
+	}
+
+	private void newExpense_Clicked(object sender, EventArgs e)
+	{
+		ExpenseEditor editor = new ExpenseEditor(false);
+		editor.Closing += model.HandleNewExpense;
+		_ = Navigation.PushModalAsync(editor);
+	}
+
+	private void editReport_Clicked(ReportView sender)
+	{
+		ReportEditor editor = new ReportEditor(sender.GetSettings().Clone());
+		editor.Closing += (r) =>
+		{
+			if (r.Result == PageResult.SAVE)
+			{
+				sender.UpdateSettings(r.EditedSettings);
+				sender.RefreshData();
+			}
+			else if (r.Result == PageResult.DELETE)
+			{
+				reports.Remove(sender);
+			}
+		};
 		_ = Navigation.PushModalAsync(editor);
 	}
 }
