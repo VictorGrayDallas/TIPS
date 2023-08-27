@@ -114,6 +114,8 @@ namespace TIPS.Views
 				AddTag(tag);
 		}
 
+		public bool AllowNewTags = true;
+
 		private void CreateControls()
 		{
 			_entry = new Entry();
@@ -217,6 +219,9 @@ namespace TIPS.Views
 
 		private void AddTag(string tagName)
 		{
+			if (!AllowNewTags && !((IEnumerable<string>)ItemsSource).Contains(tagName))
+				return;
+
 			Button label = new Button()
 			{
 				Text = tagName,

@@ -35,8 +35,6 @@ namespace TIPS.ViewModels
 		public bool NotNew { get => !IsNew; }
 
 		public ReportSettings EditedSettings { get; private set; }
-		//public ReportColumn? SelectedColumn => ui.GetSelectedColumn();
-		//public List<string>? SelectedTagGroup => ui.GetSelectedTagGroup();
 
 		// Other things
 		public PageResult Result { get; private set; } = PageResult.NOT_SET;

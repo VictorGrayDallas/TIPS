@@ -1,6 +1,7 @@
 using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using TIPS.ViewModels;
 
@@ -80,7 +81,29 @@ public partial class ExpenseEditor : ContentPage, ExpenseEditorModel.ExpenseEdit
 		//};
 	}
 
-	private void saveExpense_Clicked(object sender, EventArgs e) => model.SaveClicked();
+	private void saveExpense_Clicked(object sender, EventArgs e)
+	{
+		// Validate user input
+		StringBuilder validationErrors = new StringBuilder();
+		if (amountEntry.Value < 0)
+			validationErrors.Append("Amount must not be negative.\n");
+		if (model.IsRecurring)
+		{
+			if (!int.TryParse(frequencyEntry.Text, out int frequency))
+				validationErrors.Append("Frequency must be an integer.\n");
+			else if (frequency <= 0)
+				validationErrors.Append("Frequency must be positive.\n");
+		}
+		if (validationErrors.Length != 0)
+		{
+			validationErrors.Length--; // remove newline
+			DisplayAlert("Error", validationErrors.ToString(), "okay");
+			return;
+
+		}
+
+		model.SaveClicked();
+	}
 
 	private void cancelExpense_Clicked(object sender, EventArgs e) => model.CancelClicked();
 

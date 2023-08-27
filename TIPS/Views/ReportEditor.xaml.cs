@@ -1,5 +1,4 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Platform;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,6 +15,8 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 
 	private ReportColumn newColumn;
 	private List<string> newRow;
+
+	private bool suppressChanges = false;
 
 	internal ReportEditor(ReportSettings settings)
 	{
@@ -50,6 +51,7 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 		noTagsLabel.IsVisible = !model.EditedSettings.TagGroups.Any();
 
 		tagPicker.ItemsSource = model.AllTags;
+		tagPicker.AllowNewTags = false;
 	}
 
 	protected override void OnDisappearing()
@@ -61,6 +63,8 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 
 	private void saveButton_Clicked(object sender, EventArgs e)
 	{
+		RemoveEmptyTagGroups();
+
 		// User may have re-ordered columns and rows.
 		ObservableCollection<ReportColumn> columnsSource = (ObservableCollection<ReportColumn>)columnsView.ItemsSource;
 		model.EditedSettings.Columns.Clear();
@@ -120,12 +124,19 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 	private void headerEntry_TextChanged(object sender, TextChangedEventArgs e)
 	{
 		GetSelectedColumn()!.Header = headerEntry.Text;
+		// Update list view
+		ObservableCollection<ReportColumn> columnsSource = (ObservableCollection<ReportColumn>)columnsView.ItemsSource;
+		int index = columnsSource.IndexOf(GetSelectedColumn()!);
+		columnsSource[index] = columnsSource[index];
 	}
 
 	private void titleEntry_TextChanged(object sender, TextChangedEventArgs e) => model.EditedSettings.Title = titleEntry.Text ?? "[no title]";
 
 	private void countEntry_TextChanged(object sender, TextChangedEventArgs e)
 	{
+		if (suppressChanges)
+			return;
+
 		ReportColumn col = GetSelectedColumn()!;
 		if (int.TryParse(countEntry.Text, out int count))
 		{
@@ -134,12 +145,17 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 			else
 				countEntry.Text = "1";
 		}
+		else if (countEntry.Text == "")
+			col.NumForAverage = 1;
 		else
 			countEntry.Text = col.NumForAverage.ToString();
 	}
 
 	private void typePicker_SelectedIndexChanged(object sender, EventArgs e)
 	{
+		if (suppressChanges)
+			return;
+
 		ReportColumn col = GetSelectedColumn()!;
 		bool isDefaultHeader = col.Header == GetDefaultHeader(col);
 
@@ -164,6 +180,9 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 
 	private void unitPicker_SelectedIndexChanged(object sender, EventArgs e)
 	{
+		if (suppressChanges)
+			return;
+
 		ReportColumn col = GetSelectedColumn()!;
 		bool isDefaultHeader = col.Header == GetDefaultHeader(col);
 
@@ -192,12 +211,15 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 		columnGrid.IsVisible = col != null;
 		if (col != null)
 		{
+			suppressChanges = true;
 			headerEntry.Text = col.Header;
 			if (col.IsRolling)
 				typePicker.SelectedIndex = col.NumForAverage > 1 ? 2 : 1;
 			else
 				typePicker.SelectedIndex = 0;
 			unitPicker.SelectedIndex = (int)col.BaseUnit;
+			countEntry.Text = col.NumForAverage.ToString();
+			suppressChanges = false;
 		}
 	}
 
@@ -213,10 +235,30 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 		}
 	}
 
+	private void RemoveEmptyTagGroups()
+	{
+		var source = (tagGroupsView.ItemsSource as ObservableCollection<List<string>>)!;
+		var rows = model.EditedSettings.TagGroups;
+		for (int i = 0; i < rows.Count; i++)
+		{
+			if (rows[i].Count == 0)
+			{
+				rows.RemoveAt(i);
+				source.RemoveAt(i);
+				i--;
+			}
+		}
+	}
+
 	private bool settingTags = false;
 	private void tagGroupsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		List<string>? tags = GetSelectedTagGroup();
+		// This event handler won't run while it's also running. So settingTags will always be false, we can't use that.
+		if (tags == null || tags.Count != 0)
+			RemoveEmptyTagGroups();
+
+		settingTags = true;
 		if (tags == newRow)
 		{
 			var source = (tagGroupsView.ItemsSource as ObservableCollection<List<string>>)!;
@@ -229,11 +271,8 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 
 		tagStack.IsVisible = tags != null;
 		if (tags != null)
-		{
-			settingTags = true;
 			tagPicker.SetTags(tags);
-			settingTags = false;
-		}
+		settingTags = false;
 	}
 
 	private void UpdateSelectedTagGroupDisplay()
