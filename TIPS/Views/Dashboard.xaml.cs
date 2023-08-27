@@ -60,6 +60,10 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		recentActivityIndicator.IsRunning = recentActivityIndicator.IsVisible = false;
 		viewRecentExpenses.IsVisible = true;
 		viewRecentExpenses.EmptyView = "There are no recent expenses.";
+
+		// We should also update the reports
+		foreach (ReportView rv in reports)
+			_ = rv.RefreshData(true);
 	}
 
 	private void viewRecentExpenses_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -110,7 +114,6 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 				model.Reports[index] = r.EditedSettings;
 				model.SaveReports();
 				sender.UpdateSettings(r.EditedSettings);
-				sender.RefreshData();
 			}
 			else if (r.Result == PageResult.DELETE)
 			{

@@ -4,7 +4,7 @@ using Microsoft.Maui.Graphics;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using TIPS.ViewModels;
 
 namespace TIPS.Views;
@@ -34,14 +34,19 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 		model.UpdateSettings(settings);
 	}
 
-	public void RefreshData()
+	public async Task RefreshData(bool recalculate = false)
 	{
-		for (int i = 0; i < rowHeaderLabels.Count; i++)
-			rowHeaderLabels[i].Text = string.Join(", ", model.EffectiveTagGroups[i]);
-		for (int i = 0; i < dataLabels.Count; i++)
+		if (recalculate)
+			await model.RefreshData(); // will re-call this.RefershData
+		else
 		{
-			for (int j = 0; j < dataLabels[i].Count; j++)
-				dataLabels[i][j].Text = model.GetValue(i, j).ToString("C");
+			for (int i = 0; i < rowHeaderLabels.Count; i++)
+				rowHeaderLabels[i].Text = string.Join(", ", model.EffectiveTagGroups[i]);
+			for (int i = 0; i < dataLabels.Count; i++)
+			{
+				for (int j = 0; j < dataLabels[i].Count; j++)
+					dataLabels[i][j].Text = model.GetValue(i, j).ToString("C");
+			}
 		}
 	}
 

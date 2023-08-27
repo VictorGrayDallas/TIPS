@@ -13,7 +13,7 @@ namespace TIPS.ViewModels
 		{
 			public void RebuildGrid();
 
-			public void RefreshData();
+			public Task RefreshData(bool recalculate = false);
 
 			public void UpdateNonDataLabels();
 		}
@@ -37,7 +37,7 @@ namespace TIPS.ViewModels
 
 			_ = RefreshData();
 		}
-		private async Task RefreshData()
+		public async Task RefreshData()
 		{
 			// This is messy, but I don't know a good way to ensure certain bits of code run on the UI thread.
 			// MainThread.BeginInvokeOnMainThread would work except it is MAUI-exclusive and so not testable.
@@ -91,7 +91,7 @@ namespace TIPS.ViewModels
 				ui.RebuildGrid();
 			else
 				ui.UpdateNonDataLabels();
-			ui.RefreshData();
+			_ = ui.RefreshData();
 		}
 
 		private bool ListContainsAtLeastOne<T>(IEnumerable<T> first, IEnumerable<T> second)
