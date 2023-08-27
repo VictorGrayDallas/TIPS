@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection.PortableExecutable;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace TIPS
 {
@@ -36,6 +37,34 @@ namespace TIPS
 			TagGroups = new();
 			foreach (List<string> tg in other.TagGroups)
 				TagGroups.Add(tg.ToList());
+		}
+
+		public JsonObject ToJson()
+		{
+			JsonObject j = new JsonObject();
+			j["title"] = Title;
+			j["columns"] = new JsonArray(Columns.Select((c) => (JsonNode)c.ToJson()).ToArray());
+			j["rows"] = new JsonArray(TagGroups.Select((g) =>
+				 new JsonArray(g.Select((t) => (JsonNode)t!).ToArray())
+			).ToArray());
+
+			return j;
+		}
+
+		public static ReportSettings FromJson(JsonObject j)
+		{
+			ReportSettings settings = new ReportSettings();
+			settings.Title = (string)j["title"]!;
+			foreach (JsonNode? n in (JsonArray)j["columns"]!)
+			{
+				settings.Columns.Add(ReportColumn.FromJson(n!.AsObject()));
+			}
+			foreach (JsonNode? n in (JsonArray)j["rows"]!)
+			{
+				settings.TagGroups.Add(n!.AsArray().Select((t) => (string)t!).ToList());
+			}
+
+			return settings;
 		}
 	}
 
@@ -91,6 +120,28 @@ namespace TIPS
 				IsRolling = IsRolling,
 				BaseUnit = BaseUnit,
 				NumForAverage = NumForAverage,
+			};
+		}
+
+		public JsonObject ToJson()
+		{
+			JsonObject j = new JsonObject();
+			j["header"] = Header;
+			j["rolling"] = IsRolling;
+			j["unit"] = (int)BaseUnit;
+			j["num"] = NumForAverage;
+
+			return j;
+		}
+
+		public static ReportColumn FromJson(JsonObject j)
+		{
+			return new ReportColumn()
+			{
+				Header = (string)j["header"]!,
+				IsRolling = (bool)j["rolling"]!,
+				BaseUnit = (RecurringExpense.FrequencyUnits)(int)j["unit"]!,
+				NumForAverage = (int)j["num"]!,
 			};
 		}
 	}

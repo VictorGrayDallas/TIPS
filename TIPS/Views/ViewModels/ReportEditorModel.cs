@@ -52,10 +52,11 @@ namespace TIPS.ViewModels
 			this.ui = ui;
 			this.platformServices = platformServices ?? DefaultPlatformService.Instance;
 			originalSettings = settings;
-			IsNew = settings != null;
+			IsNew = settings == null;
 			EditedSettings = settings?.Clone() ?? new ReportSettings();
 
-			ui.HideDeleteButton();
+			if (IsNew)
+				ui.HideDeleteButton();
 		}
 
 		public void SaveClicked()

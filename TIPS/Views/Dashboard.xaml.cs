@@ -1,7 +1,7 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TIPS.ViewModels;
 
 namespace TIPS.Views;
@@ -20,31 +20,8 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		model = new(this);
 		BindingContext = model;
 
-		// We'll need to load user data for what reports they want
-		List<ReportSettings> reportSettings = new() { new ReportSettings()
-		{
-			Title = "Report",
-			Columns = new List<ReportColumn>()
-			{
-				new ReportColumn() {
-					Header = "Month to date",
-					IsRolling = false,
-				},
-				new ReportColumn() {
-					Header = "Past month",
-					IsRolling = true,
-					NumForAverage = 1,
-				},
-				new ReportColumn() {
-					Header = "Average over 12 months",
-					IsRolling = true,
-					NumForAverage = 12,
-				},
-			}
-		} };
 		reports = new();
-		// And make the report views.
-		foreach (var rs in reportSettings)
+		foreach (var rs in model.Reports)
 		{
 			ReportView report = new ReportView(rs);
 			report.EditClicked += editReport_Clicked;
@@ -73,11 +50,7 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		base.OnAppearing();
 
 		if (!firstAppearance)
-		{
 			_ = model.RefreshRecents();
-			foreach (ReportView report in reports)
-				report.RefreshData();
-		}
 		firstAppearance = false;
 	}
 
@@ -116,16 +89,22 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 	private void editReport_Clicked(ReportView sender)
 	{
 		ReportEditor editor = new ReportEditor(sender.GetSettings().Clone());
+		int index = reports.IndexOf(sender);
 		editor.Closing += (r) =>
 		{
 			if (r.Result == PageResult.SAVE)
 			{
+				model.Reports[index] = r.EditedSettings;
+				model.SaveReports();
 				sender.UpdateSettings(r.EditedSettings);
 				sender.RefreshData();
 			}
 			else if (r.Result == PageResult.DELETE)
 			{
-				reports.Remove(sender);
+				model.Reports.RemoveAt(index);
+				model.SaveReports();
+				reports.RemoveAt(index);
+				reportsLayout.RemoveAt(index);
 			}
 		};
 		_ = Navigation.PushModalAsync(editor);
