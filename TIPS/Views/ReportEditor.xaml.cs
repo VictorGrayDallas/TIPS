@@ -265,7 +265,6 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 			source.Remove(tags);
 			model.EditedSettings.TagGroups.Remove(tags);
 
-			//tagStack.IsVisible = false;
 			noTagsLabel.IsVisible = !source.Any();
 		}
 	}
