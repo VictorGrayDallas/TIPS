@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using TIPS;
+﻿using TIPS;
 using TIPS.ViewModels;
 
 namespace TIPSTestProject
@@ -38,6 +37,7 @@ namespace TIPSTestProject
 
 		public TestExpensesViewerModel() { }
 
+		// Note: The TestContext parameter is required by MSTest. It will silently fail if it is not present.
 		[ClassInitialize]
 		public static async Task CreateExpensesToView(TestContext testContext)
 		{
