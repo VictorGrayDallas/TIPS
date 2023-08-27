@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TIPS.Models.SQLiteWrappers;
 using TIPS.SQLite;
@@ -75,16 +76,24 @@ namespace TIPS
 		private Dictionary<string, int>? AllTags;
 		private Dictionary<int, string> tagNamesForBlobParsing = new();
 
-		private async Task LoadTags()
+		private SemaphoreSlim loadTags = new SemaphoreSlim(1, 1);
+		private async Task LoadTags(bool forceReload = false)
 		{
-			var dbTags = await _db!.Table<SQLiteTag>().ToListAsync();
-			AllTags = new();
-			foreach (SQLiteTag tag in dbTags)
-				AllTags[tag.TagName] = tag.Id;
+			await loadTags.WaitAsync();
 
-			tagNamesForBlobParsing = new();
-			foreach (KeyValuePair<string, int> kvp in AllTags!)
-				tagNamesForBlobParsing[kvp.Value] = kvp.Key;
+			if (forceReload || AllTags == null)
+			{
+				var dbTags = await _db!.Table<SQLiteTag>().ToListAsync();
+				AllTags = new();
+				foreach (SQLiteTag tag in dbTags)
+					AllTags[tag.TagName] = tag.Id;
+
+				tagNamesForBlobParsing = new();
+				foreach (KeyValuePair<string, int> kvp in AllTags)
+					tagNamesForBlobParsing[kvp.Value] = kvp.Key;			
+			}
+
+			loadTags.Release();
 		}
 		public async Task<IEnumerable<string>> GetAllTags()
 		{
