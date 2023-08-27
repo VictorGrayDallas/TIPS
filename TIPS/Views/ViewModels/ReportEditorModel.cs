@@ -39,7 +39,7 @@ namespace TIPS.ViewModels
 		//public List<string>? SelectedTagGroup => ui.GetSelectedTagGroup();
 
 		// Other things
-		public PageResult Result { get; private set; }
+		public PageResult Result { get; private set; } = PageResult.NOT_SET;
 
 		private ReportEditorUI ui;
 		private PlatformServices platformServices;

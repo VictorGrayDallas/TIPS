@@ -13,16 +13,24 @@
                              Padding="8"
                              x:Name="reportsLayout" >
             <Label Text="Most recent expenses"
-                   x:Name="aLabelWithDefaultFontSize"
+                   FontSize="24"
                    HorizontalOptions="Center" />
+            <ActivityIndicator IsRunning="True"
+                               x:Name="recentActivityIndicator" />
             <CollectionView x:Name="viewRecentExpenses"
                             ItemsSource="{Binding RecentExpenses}"
                             Margin="20"
                             SelectionMode="Single"
+                            IsVisible="False"
                             SelectionChanged="viewRecentExpenses_SelectionChanged">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" ItemSpacing="15" />
                 </CollectionView.ItemsLayout>
+
+                <!-- https://github.com/dotnet/maui/issues/8934, EmptyView is totally broken
+                <CollectionView.EmptyView>
+                    <ActivityIndicator IsRunning="True" IsVisible="True" />
+                </CollectionView.EmptyView>-->
             
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="local:Expense">
@@ -66,6 +74,9 @@
             <Button Text="Add New Expense"
                     Clicked="newExpense_Clicked" />
 
+            <Label Text="Reports"
+                   HorizontalOptions="Center"
+                   FontSize="24" />
         </VerticalStackLayout>
         <VerticalStackLayout Spacing="10"
                              Padding="8"
@@ -79,5 +90,10 @@
                     x:Name="viewRecurringExpensesButton"
                     Clicked="viewRecurringExpensesButton_Clicked" />
         </VerticalStackLayout>
+        <ActivityIndicator x:Name="pageActivityIndicator"
+                           IsRunning="False"
+                           Scale="0.5"
+                           Color="Red"
+                           Grid.RowSpan="2" />
     </Grid>
 </ContentPage>

@@ -2,6 +2,7 @@ using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TIPS.ViewModels;
 
 namespace TIPS.Views;
@@ -54,6 +55,13 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		firstAppearance = false;
 	}
 
+	public void RecentsRefreshed()
+	{
+		recentActivityIndicator.IsRunning = recentActivityIndicator.IsVisible = false;
+		viewRecentExpenses.IsVisible = true;
+		viewRecentExpenses.EmptyView = "There are no recent expenses.";
+	}
+
 	private void viewRecentExpenses_SelectionChanged(object sender, SelectionChangedEventArgs e)
 	{
 		expenseDetailsGrid.BindingContext = viewRecentExpenses.SelectedItem as Expense;
@@ -86,8 +94,13 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		_ = Navigation.PushModalAsync(editor);
 	}
 
-	private void editReport_Clicked(ReportView sender)
+	private async void editReport_Clicked(ReportView sender)
 	{
+		sender.IsEnabled = false;
+		pageActivityIndicator.IsRunning = true;
+		// Actually draw the activity indicator befor loading the new page
+		await Task.Yield();
+
 		ReportEditor editor = new ReportEditor(sender.GetSettings().Clone());
 		int index = reports.IndexOf(sender);
 		editor.Closing += (r) =>
@@ -106,7 +119,11 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 				reports.RemoveAt(index);
 				reportsLayout.RemoveAt(index);
 			}
+
+			pageActivityIndicator.IsRunning = false;
+			sender.IsEnabled = true;
 		};
 		_ = Navigation.PushModalAsync(editor);
+
 	}
 }

@@ -52,6 +52,13 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 		tagPicker.ItemsSource = model.AllTags;
 	}
 
+	protected override void OnDisappearing()
+	{
+		base.OnDisappearing();
+
+		Closing?.Invoke(model);
+	}
+
 	private void saveButton_Clicked(object sender, EventArgs e)
 	{
 		// User may have re-ordered columns and rows.

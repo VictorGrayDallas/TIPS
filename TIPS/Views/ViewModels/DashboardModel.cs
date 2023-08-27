@@ -15,6 +15,7 @@ namespace TIPS.ViewModels
 	{
 		internal interface DashboardUI
 		{
+			public void RecentsRefreshed();
 		}
 
 		public ObservableCollection<Expense> RecentExpenses { get; } = new();
@@ -36,8 +37,6 @@ namespace TIPS.ViewModels
 			this.ui = ui;
 
 			RecentExpenses = new();
-			DateOnly today = DateOnly.FromDateTime(DateTime.Now);
-			RecentExpenses.Add(new Expense(today) { Description = "[loading]" });
 
 			reportPath = Path.Combine(this.platformServices.AppDataPath, "reports.json");
 			JsonArray? reportJson = null;
@@ -115,6 +114,8 @@ namespace TIPS.ViewModels
 			RecentExpenses.Clear();
 			foreach (Expense e in recents)
 				RecentExpenses.Add(e);
+
+			ui.RecentsRefreshed();
 		}
 
 		public async void HandleEditedExpense(ExpenseEditorModel editor)
