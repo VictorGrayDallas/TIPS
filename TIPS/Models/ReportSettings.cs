@@ -64,7 +64,7 @@ namespace TIPS
 						return Today.AddDays(-(Today.Day - 1)).AddMonths(-(Today.Month - 1));
 				}
 				else
-					return Add(Today, BaseUnit, -NumForAverage);
+					return Add(Today, BaseUnit, -NumForAverage).AddDays(1);
 			}
 		}
 		private DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
