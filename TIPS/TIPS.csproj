@@ -4,7 +4,7 @@
 		<TargetFrameworks>net7.0-android;net7.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
-		<!-- The net6.0 target is only to support unit tests. There's no main entry point. -->
+		<!-- The net7.0 target is only to support unit tests. There's no main entry point. -->
 		<OutputType Condition="'$(TargetFramework)' != 'net7.0'">Exe</OutputType>
 		<RootNamespace>TIPS</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -12,10 +12,10 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>TIPS</ApplicationTitle>
+		<ApplicationTitle>Expense Tracker</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.tips</ApplicationId>
+		<ApplicationId>com.tips.expensetracker</ApplicationId>
 		<ApplicationIdGuid>8d5ccbeb-b43c-4210-bc8d-d91b05df596f</ApplicationIdGuid>
 
 		<!-- Versions -->
@@ -33,14 +33,13 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\iconfg.png" Color="#512BD4" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#512BD4" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
