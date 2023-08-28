@@ -7,78 +7,83 @@
              x:DataType="vms:ExpensesViewerModel"
              x:Class="TIPS.Views.ExpensesViewer"
              Title="View Expenses">
-    <VerticalStackLayout Padding="6">
-        <Label Text="Expenses"
-               x:Name="titleLabel"
-               HorizontalOptions="Center"
-               Margin="8"
-               FontSize="Title" />
-        <!-- Filtering options -->
-        <HorizontalStackLayout>
-            <Button Text="Show Filters"
-                    x:Name="filterButton"
-                    Clicked="filter_Clicked" />
-            <Label Text="{Binding ExpensesInView.Count, StringFormat='Showing {0} expenses.'}"
-                   Margin="10, 0, 0, 0"
-                   VerticalOptions="Center" />
-        </HorizontalStackLayout>
-        <Grid x:Name="filterGrid"
-              IsVisible="false"
-              ColumnSpacing="3"
-              RowDefinitions="Auto, Auto, Auto, Auto, Auto"
-              ColumnDefinitions="Auto, Auto, 1*, Auto, 1*" >
-            <Label Text="Amount"
-                   VerticalOptions="Center"/>
-            <Label Text="Min" VerticalOptions="Center" Grid.Row="0" Grid.Column="1" />
-            <views:MoneyEntry x:Name="minAmountEntry"
-                              Placeholder="Minimum Amount"
-                              Grid.Column="2" />
-            <Label Text="Max" VerticalOptions="Center" Grid.Row="0" Grid.Column="3" />
-            <views:MoneyEntry x:Name="maxAmountEntry"
-                              Placeholder="Maximum Amount"
-                              Grid.Column="4" />
-            <Label Text="Date"
-                   VerticalOptions="Center"
-                   Grid.Row="1" />
-            <Label Text="Min" VerticalOptions="Center" Grid.Row="1" Grid.Column="1" />
-            <DatePicker x:Name="minDateEntry"
-                        Grid.Row="1" Grid.Column="2" />
-            <Label Text="Max" VerticalOptions="Center" Grid.Row="1" Grid.Column="3" />
-            <DatePicker x:Name="maxDateEntry"
-                        HorizontalOptions="Fill"
-                        Grid.Row="1" Grid.Column="4" />
-            <Label Text="Description"
-                   VerticalOptions="Center"
-                   Grid.Row="2" />
-            <Entry x:Name="textFilterEntry"
-                   Placeholder="Description"
-                   Grid.Row="2"
-                   Grid.Column="1"
-                   Grid.ColumnSpan="4" />
-            <Label Text="Tag(s)"
-                   x:Name="tagsLabel"
-                   VerticalOptions="Start"
-                   BindingContext="{x:Reference Name=textFilterEntry}"
-                   x:DataType="Entry"
-                   HeightRequest="{Binding Path=Height, Mode=OneWay}"
-                   VerticalTextAlignment="Center"
-                   Grid.Row="3" />
-            <views:TagPicker x:Name="tagFilterEntry"
-                             Grid.Row="3"
-                             Grid.Column="1"
-                             Grid.ColumnSpan="4" />
-            <Button Text="Apply Filters"
-                    Clicked="applyFilters_Clicked"
-                    Grid.Row="4" />
-        </Grid>
+    <Grid RowDefinitions="Auto, *, Auto"
+          ColumnDefinitions="*"
+          Padding="6">
+        <VerticalStackLayout Grid.Row="0">
+            <Label Text="Expenses"
+                   x:Name="titleLabel"
+                   HorizontalOptions="Center"
+                   Margin="8"
+                   FontSize="Title" />
+            <!-- Filtering options -->
+            <HorizontalStackLayout>
+                <Button Text="Show Filters"
+                        x:Name="filterButton"
+                        Clicked="filter_Clicked" />
+                <Label Text="{Binding ExpensesInView.Count, StringFormat='Showing {0} expenses.'}"
+                       Margin="10, 0, 0, 0"
+                       VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <Grid x:Name="filterGrid"
+                  IsVisible="false"
+                  ColumnSpacing="3"
+                  RowDefinitions="Auto, Auto, Auto, Auto, Auto"
+                  ColumnDefinitions="Auto, Auto, 1*, Auto, 1*" >
+                <Label Text="Amount"
+                       VerticalOptions="Center"/>
+                <Label Text="Min" VerticalOptions="Center" Grid.Row="0" Grid.Column="1" />
+                <views:MoneyEntry x:Name="minAmountEntry"
+                                  Placeholder="Minimum Amount"
+                                  Grid.Column="2" />
+                <Label Text="Max" VerticalOptions="Center" Grid.Row="0" Grid.Column="3" />
+                <views:MoneyEntry x:Name="maxAmountEntry"
+                                  Placeholder="Maximum Amount"
+                                  Grid.Column="4" />
+                <Label Text="Date"
+                       VerticalOptions="Center"
+                       Grid.Row="1" />
+                <Label Text="Min" VerticalOptions="Center" Grid.Row="1" Grid.Column="1" />
+                <DatePicker x:Name="minDateEntry"
+                            Grid.Row="1" Grid.Column="2" />
+                <Label Text="Max" VerticalOptions="Center" Grid.Row="1" Grid.Column="3" />
+                <DatePicker x:Name="maxDateEntry"
+                            HorizontalOptions="Fill"
+                            Grid.Row="1" Grid.Column="4" />
+                <Label Text="Description"
+                       VerticalOptions="Center"
+                       Grid.Row="2" />
+                <Entry x:Name="textFilterEntry"
+                       Placeholder="Description"
+                       Grid.Row="2"
+                       Grid.Column="1"
+                       Grid.ColumnSpan="4" />
+                <Label Text="Tag(s)"
+                       x:Name="tagsLabel"
+                       VerticalOptions="Start"
+                       BindingContext="{x:Reference Name=textFilterEntry}"
+                       x:DataType="Entry"
+                       HeightRequest="{Binding Path=Height, Mode=OneWay}"
+                       VerticalTextAlignment="Center"
+                       Grid.Row="3" />
+                <views:TagPicker x:Name="tagFilterEntry"
+                                 Grid.Row="3"
+                                 Grid.Column="1"
+                                 Grid.ColumnSpan="4" />
+                <Button Text="Apply Filters"
+                        Clicked="applyFilters_Clicked"
+                        Grid.Row="4" />
+            </Grid>
+        </VerticalStackLayout>
         <!-- List of expenses -->
         <CollectionView x:Name="expensesCollectionView"
                         ItemsSource="{Binding ExpensesInView}"
                         Margin="20"
                         SelectionMode="Single"
-                        MaximumHeightRequest="700"
+                        VerticalOptions="Fill"
                         EmptyView="Loading..."
-                        SelectionChanged="expensesCollectionView_SelectionChanged">
+                        SelectionChanged="expensesCollectionView_SelectionChanged"
+                        Grid.Row="1" >
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
             </CollectionView.ItemsLayout>
@@ -94,31 +99,32 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
         <!-- Details of selected expense -->
-        <VerticalStackLayout x:Name="expenseDetailsView"
-                             x:DataType="local:Expense"
-                             BindingContext="null"
-                             IsVisible="false"
-                             Spacing="1.6">
-            <HorizontalStackLayout>
-                <Label Text="Next occurrence: "
-                       x:Name="detailsNextOccureceLabel"
-                       IsVisible="false" />
-                <Label Text="{Binding Date, Converter={vms:DateOnlySourceConverter}}"
-                       Margin="0, 0, 8, 0" />
-                <Label Text="{Binding Amount, StringFormat='{0:C}'}" />
-            </HorizontalStackLayout>
-            <Label Text="{Binding Tags, Converter={vms:StringCollectionConverter}}" />
-            <Label Text="{Binding Description}" />
-            <Label Text="{Binding Converter={vms:RecurenceConverter}}" 
-                   x:Name="recurrenceLabel" />
-            <Button Text="Edit"
-                    Clicked="editExpense_Clicked"
-                    Margin="0, 10"/>
+        <VerticalStackLayout Grid.Row="2" >
+            <VerticalStackLayout x:Name="expenseDetailsView"
+                                 x:DataType="local:Expense"
+                                 BindingContext="null"
+                                 IsVisible="false"
+                                 Spacing="1.6">
+                <HorizontalStackLayout>
+                    <Label Text="Next occurrence: "
+                            x:Name="detailsNextOccureceLabel"
+                            IsVisible="false" />
+                    <Label Text="{Binding Date, Converter={vms:DateOnlySourceConverter}}"
+                           Margin="0, 0, 8, 0" />
+                    <Label Text="{Binding Amount, StringFormat='{0:C}'}" />
+                </HorizontalStackLayout>
+                <Label Text="{Binding Tags, Converter={vms:StringCollectionConverter}}" />
+                <Label Text="{Binding Description}" />
+                <Label Text="{Binding Converter={vms:RecurenceConverter}}" 
+                       x:Name="recurrenceLabel" />
+                <Button Text="Edit"
+                        Clicked="editExpense_Clicked"
+                        Margin="0, 10"/>
+            </VerticalStackLayout>
+
+            <Button x:Name="newExpense"
+                    Text="Add new expense"
+                    Clicked="newExpense_Clicked" />
         </VerticalStackLayout>
-
-        <Button x:Name="newExpense"
-                Text="Add new expense"
-                Clicked="newExpense_Clicked" />
-
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

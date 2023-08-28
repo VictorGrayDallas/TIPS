@@ -6,151 +6,153 @@
              xmlns:local="clr-namespace:TIPS"
              x:Class="TIPS.Views.ReportEditor"
              Title="ReportEditor">
-    <VerticalStackLayout>
-        <Label Text="Report Editor"
-               FontSize="24"
-               HorizontalOptions="Center"/>
-        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto"
-              RowSpacing="4"
-              ColumnDefinitions="Auto, *"
-              ColumnSpacing="8"
-              Padding="6">
-            <Label Text="Report title"
-                   VerticalOptions="Center"
-                   Grid.Row="0" Grid.Column="0" />
-            <Entry Placeholder="title"
-                   x:Name="titleEntry"
-                   TextChanged="titleEntry_TextChanged"
-                   Grid.Row="0" Grid.Column="1" />
-            <!-- Columns -->
-            <Label Text="Columns"
-                   VerticalOptions="Start"
-                   Margin="0, 2"
-                   Grid.Row="1" Grid.Column="0" />
-            <Grid x:Name="columnSelector"
-                  RowDefinitions="Auto, Auto"
+    <ScrollView>
+        <VerticalStackLayout>
+            <Label Text="Report Editor"
+                   FontSize="24"
+                   HorizontalOptions="Center"/>
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto"
                   RowSpacing="4"
-                  ColumnDefinitions="*, *"
-                  ColumnSpacing="4"
-                  Grid.Row="1" Grid.Column="1" >
-                <CollectionView x:Name="columnsView"
+                  ColumnDefinitions="Auto, *"
+                  ColumnSpacing="8"
+                  Padding="6">
+                <Label Text="Report title"
+                       VerticalOptions="Center"
+                       Grid.Row="0" Grid.Column="0" />
+                <Entry Placeholder="title"
+                       x:Name="titleEntry"
+                       TextChanged="titleEntry_TextChanged"
+                       Grid.Row="0" Grid.Column="1" />
+                <!-- Columns -->
+                <Label Text="Columns"
+                       VerticalOptions="Start"
+                       Margin="0, 2"
+                       Grid.Row="1" Grid.Column="0" />
+                <Grid x:Name="columnSelector"
+                      RowDefinitions="Auto, Auto"
+                      RowSpacing="4"
+                      ColumnDefinitions="*, *"
+                      ColumnSpacing="4"
+                      Grid.Row="1" Grid.Column="1" >
+                    <CollectionView x:Name="columnsView"
+                                    SelectionMode="Single"
+                                    EmptyView="There are no columns"
+                                    CanReorderItems="True"
+                                    SelectionChanged="columnsView_SelectionChanged"
+                                    Grid.ColumnSpan="2" >
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Text="{Binding Path='.', Converter={vms:ReportColumnConverter}}" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+                <Grid x:Name="columnGrid"
+                      RowDefinitions="Auto, Auto, Auto, Auto"
+                      RowSpacing="0"
+                      ColumnDefinitions="Auto, *"
+                      ColumnSpacing="8"
+                      Grid.Row="2" Grid.Column="1">
+                    <Label Text="Header"
+                           VerticalOptions="Center"
+                           Grid.Row="0" Grid.Column="0" />
+                    <Entry Placeholder="header"
+                           x:Name="headerEntry"
+                           TextChanged="headerEntry_TextChanged"
+                           Grid.Row="0" Grid.Column="1" />
+                    <Label Text="Type"
+                           VerticalOptions="Center"
+                           Grid.Row="1" Grid.Column="0" />
+                    <Grid Grid.Row="1" Grid.Column="1"
+                          ColumnDefinitions="*, Auto, *"
+                          ColumnSpacing="6">
+                        <Picker x:Name="typePicker"
+                                SelectedIndexChanged="typePicker_SelectedIndexChanged">
+                            <Picker.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>[...] to date</x:String>
+                                    <x:String>Rolling total</x:String>
+                                    <x:String>Average over past [...]</x:String>
+                                </x:Array>
+                            </Picker.ItemsSource>
+                        </Picker>
+                        <Label Text="Count"
+                               VerticalOptions="Center"
+                               x:Name="countLabel"
+                               Grid.Column="1" />
+                        <Entry x:Name="countEntry"
+                               Keyboard="Numeric"
+                               TextChanged="countEntry_TextChanged"
+                               Grid.Column="2" />
+                    </Grid>
+                    <Label Text="Unit"
+                            VerticalOptions="Center"
+                            Grid.Row="2" Grid.Column="0" />
+                    <Picker x:Name="unitPicker"
+                            SelectedIndexChanged="unitPicker_SelectedIndexChanged"
+                            Grid.Row="2" Grid.Column="1" />
+                    <Button Text="Delete"
+                            Clicked="deleteColumn_Clicked"
+                            Grid.Row="3" Grid.ColumnSpan="2" />
+                </Grid>
+
+                <Label Text="Tag groups (rows)"
+                       VerticalOptions="Start"
+                       Margin="0, 4"
+                       Grid.Row="3" Grid.Column="0" />
+                <CollectionView x:Name="tagGroupsView"
                                 SelectionMode="Single"
-                                EmptyView="There are no columns"
                                 CanReorderItems="True"
-                                SelectionChanged="columnsView_SelectionChanged"
-                                Grid.ColumnSpan="2" >
+                                Margin="0, 4"
+                                SelectionChanged="tagGroupsView_SelectionChanged"
+                                Grid.Row="3" Grid.Column="1">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Label Text="{Binding Path='.', Converter={vms:ReportColumnConverter}}" />
+                            <Label Text="{Binding Path='.', Converter={vms:ReportRowConverter}}" />
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+                <Label Text="There are no tag groups. The report will show each tag on its own row."
+                       x:Name="noTagsLabel"
+                       IsVisible="False"
+                       Grid.Row="4" Grid.Column="1" />
+                <VerticalStackLayout x:Name="tagStack"
+                                     IsVisible="False"
+                                     Spacing="8"
+                                     Grid.Row="4" Grid.Column="1">
+                    <views:TagPicker x:Name="tagPicker"
+                                     TagAdded="tagPicker_TagAdded"
+                                     TagRemoved="tagPicker_TagRemoved" />
+                    <Button Text="Delete"
+                            HorizontalOptions="Fill"
+                            Clicked="deleteRow_Clicked" />
+                </VerticalStackLayout>
             </Grid>
-            <Grid x:Name="columnGrid"
-                  RowDefinitions="Auto, Auto, Auto, Auto"
-                  RowSpacing="0"
-                  ColumnDefinitions="Auto, *"
-                  ColumnSpacing="8"
-                  Grid.Row="2" Grid.Column="1">
-                <Label Text="Header"
-                       VerticalOptions="Center"
-                       Grid.Row="0" Grid.Column="0" />
-                <Entry Placeholder="header"
-                       x:Name="headerEntry"
-                       TextChanged="headerEntry_TextChanged"
-                       Grid.Row="0" Grid.Column="1" />
-                <Label Text="Type"
-                       VerticalOptions="Center"
-                       Grid.Row="1" Grid.Column="0" />
-                <Grid Grid.Row="1" Grid.Column="1"
-                      ColumnDefinitions="*, Auto, *"
-                      ColumnSpacing="6">
-                    <Picker x:Name="typePicker"
-                            SelectedIndexChanged="typePicker_SelectedIndexChanged">
-                        <Picker.ItemsSource>
-                            <x:Array Type="{x:Type x:String}">
-                                <x:String>[...] to date</x:String>
-                                <x:String>Rolling total</x:String>
-                                <x:String>Average over past [...]</x:String>
-                            </x:Array>
-                        </Picker.ItemsSource>
-                    </Picker>
-                    <Label Text="Count"
-                           VerticalOptions="Center"
-                           x:Name="countLabel"
-                           Grid.Column="1" />
-                    <Entry x:Name="countEntry"
-                           Keyboard="Numeric"
-                           TextChanged="countEntry_TextChanged"
-                           Grid.Column="2" />
-                </Grid>
-                <Label Text="Unit"
-                        VerticalOptions="Center"
-                        Grid.Row="2" Grid.Column="0" />
-                <Picker x:Name="unitPicker"
-                        SelectedIndexChanged="unitPicker_SelectedIndexChanged"
-                        Grid.Row="2" Grid.Column="1" />
+            <!-- save, cancel, delete -->
+            <Grid ColumnDefinitions="1*, 1*, 1*"
+                  x:Name="saveCancelGrid">
+                <Button Text="Save"
+                        Margin="3"
+                        x:Name="saveButton"
+                        Grid.Column="0"
+                        Clicked="saveButton_Clicked" />
+                <Button Text="Cancel"
+                        Margin="3"
+                        x:Name="cancelButton"
+                        Grid.Column="1"
+                        Clicked="cancelButton_Clicked" />
                 <Button Text="Delete"
-                        Clicked="deleteColumn_Clicked"
-                        Grid.Row="3" Grid.ColumnSpan="2" />
+                        Margin="3"
+                        x:Name="deleteButton"
+                        Grid.Column="2"
+                        Clicked="deleteButton_Clicked" />
             </Grid>
-
-            <Label Text="Tag groups (rows)"
-                   VerticalOptions="Start"
-                   Margin="0, 4"
-                   Grid.Row="3" Grid.Column="0" />
-            <CollectionView x:Name="tagGroupsView"
-                            SelectionMode="Single"
-                            CanReorderItems="True"
-                            Margin="0, 4"
-                            SelectionChanged="tagGroupsView_SelectionChanged"
-                            Grid.Row="3" Grid.Column="1">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Label Text="{Binding Path='.', Converter={vms:ReportRowConverter}}" />
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-            <Label Text="There are no tag groups. The report will show each tag on its own row."
-                   x:Name="noTagsLabel"
-                   IsVisible="False"
-                   Grid.Row="4" Grid.Column="1" />
-            <VerticalStackLayout x:Name="tagStack"
-                                 IsVisible="False"
-                                 Spacing="8"
-                                 Grid.Row="4" Grid.Column="1">
-                <views:TagPicker x:Name="tagPicker"
-                                 TagAdded="tagPicker_TagAdded"
-                                 TagRemoved="tagPicker_TagRemoved" />
-                <Button Text="Delete"
-                        HorizontalOptions="Fill"
-                        Clicked="deleteRow_Clicked" />
-            </VerticalStackLayout>
-        </Grid>
-        <!-- save, cancel, delete -->
-        <Grid ColumnDefinitions="1*, 1*, 1*"
-              x:Name="saveCancelGrid">
-            <Button Text="Save"
-                    Margin="3"
-                    x:Name="saveButton"
-                    Grid.Column="0"
-                    Clicked="saveButton_Clicked" />
-            <Button Text="Cancel"
-                    Margin="3"
-                    x:Name="cancelButton"
-                    Grid.Column="1"
-                    Clicked="cancelButton_Clicked" />
-            <Button Text="Delete"
-                    Margin="3"
-                    x:Name="deleteButton"
-                    Grid.Column="2"
-                    Clicked="deleteButton_Clicked" />
-        </Grid>
-    </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

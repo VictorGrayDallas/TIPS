@@ -8,103 +8,106 @@
              x:Class="TIPS.Views.ExpenseEditor"
              x:DataType="vms:ExpenseEditorModel"
              Title="Edit Expense">
-    <VerticalStackLayout Spacing="10"
-                         Margin="8">
-        <Label Text="Expense Editor"
-               HorizontalOptions="Center"
-               FontSize="Title" />
-        <Grid x:Name="grid"
-              ColumnDefinitions="Auto, 1*"
-              ColumnSpacing="12"
-              RowDefinitions="Auto, Auto, Auto, Auto, Auto" >
-            <Label Text="Amount"
-                   VerticalOptions="Center"/>
-            <views:MoneyEntry x:Name="amountEntry"
-                              Placeholder="Amount"
-                              Value="{Binding EditedExpense.Amount, Mode=OneWayToSource}"
-                              Grid.Column="1" />
-            <Label Text="Date"
-                   x:Name="dateLabel"
-                   BindingContext="{x:Reference Name=dateEntry}"
-                   x:DataType="Entry"
-                   HeightRequest="{Binding Path=Height, Mode=OneWay}"
-                   VerticalTextAlignment="Center"
-                   VerticalOptions="Start"
-                   Grid.Row="1" />
-            <VerticalStackLayout Grid.Row="1"
-                                 Grid.Column="1" >
-                <DatePicker x:Name="dateEntry"
-                            Date="{Binding EditedExpense.Date, Mode=OneWayToSource, Converter={vms:DateOnlySourceConverter}}"
-                            DateSelected="dateEntry_DateSelected"/>
-                <HorizontalStackLayout IsVisible="{Binding RecurringWillTriggerOnSave}"
-                                       x:Name="triggerWarningLayout" >
-                    <Image Source="plain_warning.png"
-                           x:Name="triggerWarningImage"
-                           Margin="0, 0, 6, 0"
-                           MaximumHeightRequest="100"
-                           Scale="0.85"
-                           VerticalOptions="Start" />
-                    <Label Text="The recurring expense will trigger immediately upon saving, because the date is today or is in the past."
-                           MinimumWidthRequest="70"
-                           VerticalOptions="Start"
-                           x:Name="triggerWarningLabel" />
-                </HorizontalStackLayout>
-            </VerticalStackLayout>
-            <Label Text="Description"
-                   VerticalOptions="Center"
-                   Grid.Row="2" />
-                <Entry x:Name="descriptionEntry"
-                       Text="{Binding EditedExpense.Description, Mode=OneWayToSource}"
-                       Placeholder="Description"
-                       Grid.Row="2"
-                       Grid.Column="1" />
-            <Label Text="Tag(s)"
-                   x:Name="tagsLabel"
-                   VerticalOptions="Start"
-                   BindingContext="{x:Reference Name=descriptionEntry}"
-                   x:DataType="Entry"
-                   HeightRequest="{Binding Path=Height, Mode=OneWay}"
-                   VerticalTextAlignment="Center"
-                   Grid.Row="3" />
-            <views:TagPicker x:Name="tagEntry"
-                             Grid.Row="3"
-                             Grid.Column="1" />
-            <Label Text="Frequency"
-                   VerticalOptions="Center"
-                   Grid.Row="4" />
-            <Grid Grid.Row="4"
-                  Grid.Column="1"
-                  ColumnDefinitions="Auto,*"
-                  ColumnSpacing="8">
-                <Entry x:Name="frequencyEntry"
-                       Text="{Binding ExpenseAsRecurring.Frequency, Mode=OneWayToSource}"
-                       Placeholder="Frequency">
-                </Entry>
-                <Picker x:Name="unitPicker"
-                        Grid.Column="1"
-                        SelectedItem="{Binding ExpenseAsRecurring.FrequencyUnit, Mode=OneWayToSource}" />
+    <ScrollView>
+        <VerticalStackLayout Spacing="10"
+                             Margin="8">
+            <Label Text="Expense Editor"
+                   HorizontalOptions="Center"
+                   FontSize="Title" />
+            <Grid x:Name="grid"
+                  ColumnDefinitions="Auto, 1*"
+                  ColumnSpacing="12"
+                  RowDefinitions="Auto, Auto, Auto, Auto, Auto" >
+                <Label Text="Amount"
+                       VerticalOptions="Center"/>
+                <views:MoneyEntry x:Name="amountEntry"
+                                  Placeholder="Amount"
+                                  Value="{Binding EditedExpense.Amount, Mode=OneWayToSource}"
+                                  Grid.Column="1" />
+                <Label Text="Date"
+                       x:Name="dateLabel"
+                       BindingContext="{x:Reference Name=dateEntry}"
+                       x:DataType="Entry"
+                       HeightRequest="{Binding Path=Height, Mode=OneWay}"
+                       VerticalTextAlignment="Center"
+                       VerticalOptions="Start"
+                       Grid.Row="1" />
+                <VerticalStackLayout Grid.Row="1"
+                                     Grid.Column="1" >
+                    <DatePicker x:Name="dateEntry"
+                                Date="{Binding EditedExpense.Date, Mode=OneWayToSource, Converter={vms:DateOnlySourceConverter}}"
+                                DateSelected="dateEntry_DateSelected"/>
+                    <HorizontalStackLayout IsVisible="{Binding RecurringWillTriggerOnSave}"
+                                           x:Name="triggerWarningLayout" >
+                        <Image Source="plain_warning.png"
+                               x:Name="triggerWarningImage"
+                               Margin="0, 0, 6, 0"
+                               MaximumHeightRequest="100"
+                               Scale="0.85"
+                               VerticalOptions="Start" />
+                        <Label Text="The recurring expense will trigger immediately upon saving, because the date is today or is in the past."
+                               MinimumWidthRequest="70"
+                               VerticalOptions="Start"
+                               x:Name="triggerWarningLabel" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <Label Text="Description"
+                       VerticalOptions="Center"
+                       Grid.Row="2" />
+                    <Entry x:Name="descriptionEntry"
+                           Text="{Binding EditedExpense.Description, Mode=OneWayToSource}"
+                           Placeholder="Description"
+                           Grid.Row="2"
+                           Grid.Column="1" />
+                <Label Text="Tag(s)"
+                       x:Name="tagsLabel"
+                       VerticalOptions="Start"
+                       BindingContext="{x:Reference Name=descriptionEntry}"
+                       x:DataType="Entry"
+                       HeightRequest="{Binding Path=Height, Mode=OneWay}"
+                       VerticalTextAlignment="Center"
+                       Grid.Row="3" />
+                <views:TagPicker x:Name="tagEntry"
+                                 Grid.Row="3"
+                                 Grid.Column="1" />
+                <Label Text="Frequency"
+                       VerticalOptions="Center"
+                       Grid.Row="4" />
+                <Grid Grid.Row="4"
+                      Grid.Column="1"
+                      ColumnDefinitions="Auto,*"
+                      ColumnSpacing="8">
+                    <Entry x:Name="frequencyEntry"
+                           Keyboard="Numeric"
+                           Text="{Binding ExpenseAsRecurring.Frequency, Mode=OneWayToSource}"
+                           Placeholder="Frequency">
+                    </Entry>
+                    <Picker x:Name="unitPicker"
+                            Grid.Column="1"
+                            SelectedItem="{Binding ExpenseAsRecurring.FrequencyUnit, Mode=OneWayToSource}" />
+                </Grid>
             </Grid>
-        </Grid>
                 
-        <!-- Save, cancel, delete buttons -->
-        <Grid ColumnDefinitions="1*, 1*, 1*"
-              x:Name="saveCancelGrid">
-            <Button Text="Save"
-                    Margin="3"
-                    x:Name="saveExpense"
-                    Grid.Column="0"
-                    Clicked="saveExpense_Clicked" />
-            <Button Text="Cancel"
-                    Margin="3"
-                    x:Name="cancelExpense"
-                    Grid.Column="1"
-                    Clicked="cancelExpense_Clicked" />
-            <Button Text="Delete"
-                    IsVisible="{Binding NotNew, Mode=OneWay}"
-                    Margin="3"
-                    x:Name="deleteExpense"
-                    Grid.Column="2"
-                    Clicked="deleteExpense_Clicked" />
-        </Grid>
-    </VerticalStackLayout>
+            <!-- Save, cancel, delete buttons -->
+            <Grid ColumnDefinitions="1*, 1*, 1*"
+                  x:Name="saveCancelGrid">
+                <Button Text="Save"
+                        Margin="3"
+                        x:Name="saveExpense"
+                        Grid.Column="0"
+                        Clicked="saveExpense_Clicked" />
+                <Button Text="Cancel"
+                        Margin="3"
+                        x:Name="cancelExpense"
+                        Grid.Column="1"
+                        Clicked="cancelExpense_Clicked" />
+                <Button Text="Delete"
+                        IsVisible="{Binding NotNew, Mode=OneWay}"
+                        Margin="3"
+                        x:Name="deleteExpense"
+                        Grid.Column="2"
+                        Clicked="deleteExpense_Clicked" />
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

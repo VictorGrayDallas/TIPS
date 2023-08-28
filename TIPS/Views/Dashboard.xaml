@@ -7,11 +7,9 @@
              x:Class="TIPS.Views.Dashboard"
              x:DataType="vms:DashboardModel"
              Title="Dashboard">
-    <!-- Grid because MAUI's layout options suck -->
-    <Grid RowDefinitions="Auto, *">
+    <Grid RowDefinitions="Auto, *, Auto">
         <VerticalStackLayout Spacing="10"
-                             Padding="8"
-                             x:Name="reportsLayout" >
+                             Padding="8" >
             <Label Text="Most recent expenses"
                    FontSize="24"
                    HorizontalOptions="Center" />
@@ -73,15 +71,22 @@
 
             <Button Text="Add New Expense"
                     Clicked="newExpense_Clicked" />
-
+        
             <Label Text="Reports"
-                   HorizontalOptions="Center"
-                   FontSize="24" />
+                    HorizontalOptions="Center"
+                    FontSize="24" />
         </VerticalStackLayout>
+        
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout x:Name="reportsLayout"
+                                 Spacing="10" >
+            </VerticalStackLayout>
+        </ScrollView>
+        
         <VerticalStackLayout Spacing="10"
                              Padding="8"
                              VerticalOptions="End"
-                             Grid.Row="1" >
+                             Grid.Row="2" >
             <Button Text="View All Expenses" 
                     x:Name="viewSingleExpensesButton"
                     Clicked="viewSingleExpensesButton_Clicked" />
