@@ -65,6 +65,12 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 	{
 		RemoveEmptyTagGroups();
 
+		if (model.EditedSettings.Columns.Count == 0)
+		{
+			DisplayAlert("Error", "Report must have at least one column.", "okay");
+			return;
+		}
+
 		// User may have re-ordered columns and rows.
 		ObservableCollection<ReportColumn> columnsSource = (ObservableCollection<ReportColumn>)columnsView.ItemsSource;
 		model.EditedSettings.Columns.Clear();
@@ -97,7 +103,6 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 
 	public void Close()
 	{
-		Closing?.Invoke(model);
 		Navigation.PopModalAsync();
 	}
 
@@ -123,6 +128,9 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 
 	private void headerEntry_TextChanged(object sender, TextChangedEventArgs e)
 	{
+		if (suppressChanges)
+			return;
+
 		GetSelectedColumn()!.Header = headerEntry.Text;
 		// Update list view
 		ObservableCollection<ReportColumn> columnsSource = (ObservableCollection<ReportColumn>)columnsView.ItemsSource;

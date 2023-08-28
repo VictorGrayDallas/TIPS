@@ -7,7 +7,8 @@
              x:Class="TIPS.Views.Dashboard"
              x:DataType="vms:DashboardModel"
              Title="Dashboard">
-    <Grid RowDefinitions="Auto, *, Auto">
+    <Grid RowDefinitions="Auto, *, Auto"
+          RowSpacing="10" >
         <VerticalStackLayout Spacing="10"
                              Padding="8" >
             <Label Text="Most recent expenses"
@@ -72,6 +73,14 @@
             <Button Text="Add New Expense"
                     Clicked="newExpense_Clicked" />
         
+            <Button Text="View All Expenses" 
+                    x:Name="viewSingleExpensesButton"
+                    Clicked="viewSingleExpensesButton_Clicked" />
+
+            <Button Text="View Recurring Expenses" 
+                    x:Name="viewRecurringExpensesButton"
+                    Clicked="viewRecurringExpensesButton_Clicked" />
+            
             <Label Text="Reports"
                     HorizontalOptions="Center"
                     FontSize="24" />
@@ -87,13 +96,10 @@
                              Padding="8"
                              VerticalOptions="End"
                              Grid.Row="2" >
-            <Button Text="View All Expenses" 
-                    x:Name="viewSingleExpensesButton"
-                    Clicked="viewSingleExpensesButton_Clicked" />
-
-            <Button Text="View Recurring Expenses" 
-                    x:Name="viewRecurringExpensesButton"
-                    Clicked="viewRecurringExpensesButton_Clicked" />
+            <Button Text="New Report" 
+                    x:Name="newReportButton"
+                    Margin="0, 4"
+                    Clicked="newReportButton_Clicked" />
         </VerticalStackLayout>
         <ActivityIndicator x:Name="pageActivityIndicator"
                            IsRunning="False"

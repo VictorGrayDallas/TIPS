@@ -129,4 +129,23 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		_ = Navigation.PushModalAsync(editor);
 
 	}
+
+	private void newReportButton_Clicked(object sender, EventArgs e)
+	{
+		ReportEditor editor = new ReportEditor(new ReportSettings());
+		editor.Closing += (r) =>
+		{
+			if (r.Result == PageResult.SAVE)
+			{
+				model.Reports.Add(r.EditedSettings);
+				ReportView report = new ReportView(r.EditedSettings);
+				report.EditClicked += editReport_Clicked;
+				reports.Add(report);
+				reportsLayout.Add(report);
+
+				model.SaveReports();
+			}
+		};
+		_ = Navigation.PushModalAsync(editor);
+	}
 }
