@@ -23,6 +23,7 @@ public partial class ExpensesViewer : ContentPage, ExpensesViewerModel.ExpensesV
 		BindingContext = model;
 
 		tagFilterEntry.ItemsSource = model.AllTags;
+		tagFilterEntry.AllowNewTags = false;
 
 		if (viewRecurring)
 		{
