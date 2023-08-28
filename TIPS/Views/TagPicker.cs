@@ -21,20 +21,20 @@ namespace TIPS.Views
 	internal class TagPicker : VerticalStackLayout
 	{
 		private Entry _entry;
-		private ListView _listView;
+		private CollectionView _collectionView;
 		private FlexLayout _tagsLayout;
 		private Dictionary<string, Button> _tagLabels = new();
 
 		//Bindable properties
 		#region "Bindable Properties"
-		public static readonly BindableProperty ListViewHeightRequestProperty = BindableProperty.Create(nameof(ListViewHeightRequest), typeof(double), typeof(TagPicker), defaultValue: null, propertyChanged: (bindable, oldVal, newVal) => {
+		public static readonly BindableProperty CollectionViewHeightRequestProperty = BindableProperty.Create(nameof(CollectionViewHeightRequest), typeof(double), typeof(TagPicker), defaultValue: null, propertyChanged: (bindable, oldVal, newVal) => {
 			var picker = (TagPicker)bindable;
-			picker._listView.HeightRequest = (double)newVal;
+			picker._collectionView.HeightRequest = (double)newVal;
 		});
-		public double ListViewHeightRequest
+		public double CollectionViewHeightRequest
 		{
-			get { return (double)GetValue(ListViewHeightRequestProperty); }
-			set { SetValue(ListViewHeightRequestProperty, value); }
+			get { return (double)GetValue(CollectionViewHeightRequestProperty); }
+			set { SetValue(CollectionViewHeightRequestProperty, value); }
 		}
 		public static readonly BindableProperty EntryBackgroundColorProperty = BindableProperty.Create(nameof(EntryBackgroundColor), typeof(Color), typeof(TagPicker), defaultValue: null, propertyChanged: (bindable, oldVal, newVal) => {
 			var picker = (TagPicker)bindable;
@@ -69,7 +69,7 @@ namespace TIPS.Views
 		}
 		public static new readonly BindableProperty VisualProperty = BindableProperty.Create(nameof(Visual), typeof(IVisual), typeof(TagPicker), defaultValue: new VisualMarker.DefaultVisual(), propertyChanged: (bindable, oldVal, newVal) => {
 			var picker = (TagPicker)bindable;
-			picker._listView.Visual = (IVisual)newVal;
+			picker._collectionView.Visual = (IVisual)newVal;
 			picker._entry.Visual = (IVisual)newVal;
 		});
 		public new IVisual Visual
@@ -97,7 +97,7 @@ namespace TIPS.Views
 		}
 		#endregion
 
-		private bool ShouldShowListView { get => _listView.ItemsSource != null && (_listView.ItemsSource as IEnumerable<string>)!.Any(); }
+		private bool ShouldShowCollectionView { get => _collectionView.ItemsSource != null && (_collectionView.ItemsSource as IEnumerable<string>)!.Any(); }
 
 		public event EventHandler<string>? TagAdded;
 		public event EventHandler<string>? TagRemoved;
@@ -119,7 +119,7 @@ namespace TIPS.Views
 		private void CreateControls()
 		{
 			_entry = new Entry();
-			_listView = new ListView();
+			_collectionView = new CollectionView();
 			_tagsLayout = new FlexLayout();
 
 			//Entry used for filtering list view
@@ -127,48 +127,57 @@ namespace TIPS.Views
 			_entry.Keyboard = Keyboard.Create(KeyboardFlags.None);
 
 			//List view - used to display search options
-			_listView.IsVisible = false;
-			_listView.Margin = new Thickness(0);
-			Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific.ListView.SetSeparatorStyle(_listView, Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific.SeparatorStyle.FullWidth);
-			_listView.MaximumHeightRequest = 100;
+			_collectionView.IsVisible = false;
+			_collectionView.SelectionMode = SelectionMode.Single;
+			_collectionView.Margin = new Thickness(0);
+			_collectionView.MaximumHeightRequest = 100;
+			_collectionView.VerticalOptions = LayoutOptions.Start; // This is required, or scrolling will be very broken. With this, it's only sometimes a little broken.
+			// We need to use padding instead of CollectionView.ItemsLayout.ItemsSpacing so that users can tap the padding space to select items.
+			_collectionView.ItemTemplate = new DataTemplate(() =>
+			{
+				Label l = new Label();
+				l.Padding = new Thickness(0, 5);
+				l.SetBinding(Label.TextProperty, ".");
+				return l;
+			});
 
 			//Add bottom border
 			var boxView = new BoxView();
 			boxView.HeightRequest = 1;
 			boxView.Color = Colors.Black;
 			boxView.Margin = new Thickness(0);
-			boxView.SetBinding(BoxView.IsVisibleProperty, new Binding(nameof(ListView.IsVisible), source: _listView));
+			boxView.SetBinding(BoxView.IsVisibleProperty, new Binding(nameof(CollectionView.IsVisible), source: _collectionView));
 
 			_tagsLayout.JustifyContent = Microsoft.Maui.Layouts.FlexJustify.Start;
 			_tagsLayout.Direction = Microsoft.Maui.Layouts.FlexDirection.Row;
 			_tagsLayout.Wrap = Microsoft.Maui.Layouts.FlexWrap.Wrap;
 
 			Children.Add(_entry);
-			Children.Add(_listView);
+			Children.Add(_collectionView);
 			Children.Add(boxView);
 			Children.Add(_tagsLayout);
 
 		}
 		private void SetControlEventHandlers()
 		{
-			_listView.ItemSelected += (sender, args) =>
+			_collectionView.SelectionChanged += (sender, args) =>
 			{
-				if (args.SelectedItem is string item && item != null)
+				if (args.CurrentSelection.FirstOrDefault() is string item && item != null)
 				{
 					_entry.Text = "";
 					_entry.Unfocus();
 
 					AddTag(item);
 				}
-				if (args.SelectedItem != null)
-					_listView.SelectedItem = null;
+				if (args.CurrentSelection.FirstOrDefault() != null)
+					_collectionView.SelectedItem = null;
 			};
 
 			//Text changed event, bring it back to the surface
 			_entry.TextChanged += (sender, args) =>
 			{
 				FilterTags(_entry.Text);
-				_listView.IsVisible = ShouldShowListView;
+				_collectionView.IsVisible = ShouldShowCollectionView;
 				TextChanged?.Invoke(this, args);
 			};
 			_entry.Completed += (sender, args) =>
@@ -180,10 +189,10 @@ namespace TIPS.Views
 				}
 			};
 
-			_entry.Focused += (sender, args) => _listView.IsVisible = ShouldShowListView;
+			_entry.Focused += (sender, args) => _collectionView.IsVisible = ShouldShowCollectionView;
 			_entry.Unfocused += (sender, args) =>
 			{
-				_listView.IsVisible = false;
+				_collectionView.IsVisible = false;
 				if (!string.IsNullOrEmpty(_entry.Text))
 				{
 					AddTag(_entry.Text);
@@ -194,7 +203,7 @@ namespace TIPS.Views
 		public TagPicker()
 		{
 			// CreateControls sets these, but analyzer is dumb
-			_entry = null!; _listView = null!; _tagsLayout = null!;
+			_entry = null!; _collectionView = null!; _tagsLayout = null!;
 
 			CreateControls();
 			SetControlEventHandlers();
@@ -212,7 +221,7 @@ namespace TIPS.Views
 		private void FilterTags(string? filter)
 		{
 			filter = filter ?? "";
-			_listView.ItemsSource = _itemsSource
+			_collectionView.ItemsSource = _itemsSource
 				.Where((t) => t.ToLower().Contains(filter.ToLower()))
 				.Where((t) => !_tagLabels.ContainsKey(t));
 		}

@@ -80,7 +80,6 @@
                         ItemsSource="{Binding ExpensesInView}"
                         Margin="20"
                         SelectionMode="Single"
-                        VerticalOptions="Fill"
                         EmptyView="Loading..."
                         SelectionChanged="expensesCollectionView_SelectionChanged"
                         Grid.Row="1" >
