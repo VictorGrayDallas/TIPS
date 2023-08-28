@@ -1,5 +1,6 @@
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Xaml;
 using Microsoft.Maui.Graphics;
 
 using System;
@@ -14,6 +15,11 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 	private ReportViewModel model;
 
 	public event Action<ReportView>? EditClicked;
+
+	private static Color backgroundColorDarkMode = Colors.Black;
+	private static Color backgroundColorLightMode = Colors.White;
+	private static Color foregroundColorDarkMode = Colors.White;
+	private static Color foregroundColorLightMode = Colors.Black;
 
 	private Grid grid = null!;
 	private Label titleLabel = new();
@@ -57,26 +63,32 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 
 	public ReportSettings GetSettings() => model.GetSettings();
 
-	private BoxView GetCellBackground()
+	private BoxView MakeCellBackground()
 	{
-		Color cellColor = Colors.White;
-		return new BoxView()
+		BoxView box = new BoxView()
 		{
-			Color = cellColor,
 			HorizontalOptions = LayoutOptions.Fill,
 			VerticalOptions = LayoutOptions.Fill,
 		};
+		box.SetAppThemeColor(BoxView.ColorProperty, backgroundColorLightMode, backgroundColorDarkMode);
+		return box;
+	}
+	private Label MakeLabel()
+	{
+		Label label = new Label();
+		label.SetAppThemeColor(Label.BackgroundColorProperty, backgroundColorLightMode, backgroundColorDarkMode);
+		label.SetAppThemeColor(Label.TextColorProperty, foregroundColorLightMode, foregroundColorDarkMode);
+		return label;
 	}
 	private Label MakeCellLabel()
 	{
 		double cellWidthPadding = 4;
 		double cellHeightPadding = 3;
 
-		return new Label()
-		{
-			VerticalOptions = LayoutOptions.Center,
-			Padding = new Thickness(cellWidthPadding, cellHeightPadding),
-		};
+		Label label = MakeLabel();
+		label.VerticalOptions = LayoutOptions.Center;
+		label.Padding = new Thickness(cellWidthPadding, cellHeightPadding);
+		return label;
 	}
 	private Label MakeHeaderLabel()
 	{
@@ -97,8 +109,6 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 
 		// const values
 		string Pencil = "\xf2bf";
-		Color fontColor = Colors.Black;
-		Color gridLinesColor = Colors.Black;
 		double gridLineThickness = 1;
 
 		Grid topLayout = new Grid();
@@ -108,19 +118,20 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 		topLayout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
 
 		// Title
-		titleLabel = new Label();
+		titleLabel = MakeLabel();
 		titleLabel.FontSize = 24;
 		titleLabel.VerticalOptions = LayoutOptions.Center;
 		topLayout.Add(titleLabel);
 
 		// Edit button
 		ImageButton editButton = new();
+		editButton.SetAppThemeColor(ImageButton.BackgroundColorProperty, backgroundColorLightMode, backgroundColorDarkMode);
 		editButton.Source = new FontImageSource()
 		{
 			Glyph = Pencil,
-			Color = fontColor,
 			FontFamily = "ionicons",
 		};
+		editButton.Source.SetAppThemeColor(FontImageSource.ColorProperty, foregroundColorLightMode, foregroundColorDarkMode);
 		editButton.Clicked += (s, e) => EditClicked?.Invoke(this);
 		topLayout.Add(editButton, 1);
 
@@ -129,8 +140,8 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 		{
 			RowSpacing = gridLineThickness,
 			ColumnSpacing = gridLineThickness,
-			BackgroundColor = gridLinesColor,
 		};
+		grid.SetAppThemeColor(Grid.BackgroundColorProperty, foregroundColorLightMode, foregroundColorDarkMode);
 		grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
 		for (int i = 1; i < columns; i++)
 			grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
@@ -139,7 +150,7 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 		columnHeaderLabels.Clear();
 		grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
 		for (int i = 0; i < grid.ColumnDefinitions.Count; i++)
-			grid.Add(GetCellBackground(), i, 0);
+			grid.Add(MakeCellBackground(), i, 0);
 
 		Label chl = MakeHeaderLabel();
 		columnHeaderLabels.Add(chl);
@@ -169,7 +180,7 @@ public partial class ReportView : VerticalStackLayout, ReportViewModel.ReportVie
 		int row = grid.RowDefinitions.Count - 1;
 
 		for (int i = 0; i < grid.ColumnDefinitions.Count; i++)
-			grid.Add(GetCellBackground(), i, row);
+			grid.Add(MakeCellBackground(), i, row);
 
 		// row header
 		Label label = MakeCellLabel();
