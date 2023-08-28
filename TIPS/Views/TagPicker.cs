@@ -230,6 +230,8 @@ namespace TIPS.Views
 		{
 			if (!AllowNewTags && !((IEnumerable<string>)ItemsSource).Contains(tagName))
 				return;
+			if (_tagLabels.ContainsKey(tagName))
+				return;
 
 			Button label = new Button()
 			{
@@ -244,6 +246,9 @@ namespace TIPS.Views
 			_tagsLayout.Add(label);
 
 			TagAdded?.Invoke(this, tagName);
+
+			// Remove selected tag from list
+			FilterTags("");
 		}
 		private void EditTag(string tagName)
 		{
