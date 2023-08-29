@@ -8,12 +8,12 @@
              x:DataType="vms:DashboardModel"
              Title="Dashboard">
     <Grid RowDefinitions="Auto, *, Auto"
-          RowSpacing="10" >
+          RowSpacing="10"
+          Padding="8" >
         <Grid.GestureRecognizers>
             <TapGestureRecognizer Tapped="nearRecents_Clicked" />
         </Grid.GestureRecognizers>
-        <VerticalStackLayout Spacing="10"
-                             Padding="8" >
+        <VerticalStackLayout Spacing="10" >
             <Grid ColumnDefinitions="*, Auto">
                 <Label Text="Most recent expenses"
                        FontSize="24"
@@ -113,7 +113,6 @@
         </ScrollView>
         
         <VerticalStackLayout Spacing="10"
-                             Padding="8"
                              VerticalOptions="End"
                              Grid.Row="2" >
             <Button Text="New Report" 
