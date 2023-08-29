@@ -148,4 +148,9 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		};
 		_ = Navigation.PushModalAsync(editor);
 	}
+
+	private void nearRecents_Clicked(object sender, TappedEventArgs e)
+	{
+		viewRecentExpenses.SelectedItem = null;
+    }
 }

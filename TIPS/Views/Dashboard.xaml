@@ -9,6 +9,9 @@
              Title="Dashboard">
     <Grid RowDefinitions="Auto, *, Auto"
           RowSpacing="10" >
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="nearRecents_Clicked" />
+        </Grid.GestureRecognizers>
         <VerticalStackLayout Spacing="10"
                              Padding="8" >
             <Label Text="Most recent expenses"
