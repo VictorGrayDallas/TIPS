@@ -43,8 +43,6 @@ namespace TIPSTestProject
 		{
 			service = new TestPlatformService("expensesviewermodel.db");
 			testDbName = Path.Combine(service.AppDataPath, "expensesviewermodel.db");
-			if (File.Exists(testDbName))
-				File.Delete(testDbName);
 
 			Expense expense1 = new Expense(today)
 			{
@@ -75,8 +73,9 @@ namespace TIPSTestProject
 			recurringExpenses.Add(await sqlService.AddRecurringExpense(recurringExpense));
 		}
 		[ClassCleanup]
-		public static void Cleanup()
+		public static async Task Cleanup()
 		{
+			await service.GetSQLiteService().Close();
 			File.Delete(testDbName);
 		}
 

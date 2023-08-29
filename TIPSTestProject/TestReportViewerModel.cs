@@ -11,9 +11,10 @@ namespace TIPSTestProject
 		{
 			public void RebuildGrid() { }
 
-			public async Task RefreshData(bool recalculate = false)
+			public Task RefreshData(bool recalculate = false)
 			{
 				refreshed = true;
+				return new Task(() => { });
 			}
 
 			public void UpdateNonDataLabels() { }
