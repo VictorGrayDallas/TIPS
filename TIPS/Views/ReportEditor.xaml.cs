@@ -161,6 +161,7 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 
 	private void typePicker_SelectedIndexChanged(object sender, EventArgs e)
 	{
+		countLabel.IsVisible = countEntry.IsVisible = typePicker.SelectedIndex == 2;
 		if (suppressChanges)
 			return;
 
@@ -177,7 +178,6 @@ public partial class ReportEditor : ContentPage, ReportEditorModel.ReportEditorU
 			col.NumForAverage = 3;
 			countEntry.Text = "3";
 		}
-		countLabel.IsVisible = countEntry.IsVisible = typePicker.SelectedIndex == 2;
 
 		if (isDefaultHeader)
 		{
