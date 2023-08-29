@@ -8,7 +8,7 @@
     Shell.FlyoutBehavior="Disabled">
 
     <ShellContent
-        Title="Home"
+        Title="{x:Null}"
         ContentTemplate="{DataTemplate views:Dashboard}"
         Route="MainPage" />
 

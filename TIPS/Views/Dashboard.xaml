@@ -5,8 +5,7 @@
              xmlns:views="clr-namespace:TIPS.Views"
              xmlns:vms="clr-namespace:TIPS.ViewModels"
              x:Class="TIPS.Views.Dashboard"
-             x:DataType="vms:DashboardModel"
-             Title="Dashboard">
+             x:DataType="vms:DashboardModel">
     <Grid RowDefinitions="Auto, *, Auto"
           RowSpacing="10"
           Padding="8" >
