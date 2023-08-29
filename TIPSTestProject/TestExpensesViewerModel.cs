@@ -63,7 +63,7 @@ namespace TIPSTestProject
 			expense3.Date = expense3.Date.AddMonths(-2);
 			expense3.Tags.RemoveAt(1);
 
-			RecurringExpense recurringExpense = new RecurringExpense(expense1.Date.AddDays(-4), 2, RecurringExpense.FrequencyUnits.Weeks);
+			RecurringExpense recurringExpense = new RecurringExpense(expense1.Date.AddDays(4), 2, RecurringExpense.FrequencyUnits.Weeks);
 			recurringExpense.CopyFrom(expense1);
 
 			SQLiteService sqlService = service.GetSQLiteService();
@@ -127,6 +127,44 @@ namespace TIPSTestProject
 
 			// Cleanup
 			await service.GetSQLiteService().DeleteExpense(model.ExpensesInView[0]);
+		}
+
+		[TestMethod]
+		[DoNotParallelize]
+		public async Task TestNewRecurringExpenseWithImmediateTrigger()
+		{
+			TestUI ui = new();
+			ExpensesViewerModel model = new(true, ui, service);
+			SQLiteService sqlService = service.GetSQLiteService();
+			string description = "recurringwithimmediatetrigger";
+			await ui.WaitUntilRefresh();
+
+			ExpenseEditorModel editorModel = new(true, new TestExpenseEditorModel.TestUI(), service);
+			editorModel.EditedExpense.Amount = 9m;
+			editorModel.EditedExpense.Date = today;
+			editorModel.EditedExpense.Description = description;
+			// copy what we're adding for comparison later
+			Expense fromRecurring = new Expense(today);
+			fromRecurring.CopyFrom(editorModel.EditedExpense);
+
+			// Save
+			editorModel.SaveClicked();
+			model.HandleNewExpense(editorModel);
+			await ui.WaitUntilRefresh();
+
+			// verify
+			assert(model.ExpensesInView.Count == 2);
+			TIPSAssert.AssertExpensesMatch(model.ExpensesInView[0], editorModel.EditedExpense);
+			assert(editorModel.EditedExpense.Date == fromRecurring.Date.AddMonths(1));
+			Expense? autoCreated = (await sqlService.GetExpenses(today))
+				.Where((e) => e.Description == description)
+				.FirstOrDefault();
+			assert(autoCreated != null);
+			TIPSAssert.AssertExpensesMatch(autoCreated!, fromRecurring);
+
+			// Cleanup
+			await sqlService.DeleteExpense(editorModel.EditedExpense);
+			await sqlService.DeleteExpense(autoCreated!);
 		}
 
 		[TestMethod]

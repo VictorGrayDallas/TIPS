@@ -66,9 +66,8 @@ namespace TIPS.ViewModels
 			{
 				if (viewingRecurring)
 				{
-					await service.AddRecurringExpense(editor.ExpenseAsRecurring!);
+					editor.EditedExpense = await service.AddRecurringExpense(editor.ExpenseAsRecurring!);
 					_ = service.ProcessRecurringExpense(editor.ExpenseAsRecurring!);
-					_ = RefreshList();
 				}
 				else
 					await service.AddSingleExpense(editor.EditedExpense);
