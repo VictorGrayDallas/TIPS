@@ -75,7 +75,7 @@ namespace TIPS.ViewModels
 				EditedExpense = new RecurringExpense(DateOnly.FromDateTime(DateTime.Now), 1, RecurringExpense.FrequencyUnits.Months);
 			else
 				EditedExpense = new Expense(DateOnly.FromDateTime(DateTime.Now));
-			EditedExpense.Amount = 1.23m;
+			EditedExpense.Amount = 0m;
 			EditedExpense.Description = "";
 
 			IsNew = true;
