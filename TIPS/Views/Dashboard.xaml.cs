@@ -61,6 +61,13 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 		viewRecentExpenses.IsVisible = true;
 		viewRecentExpenses.EmptyView = "There are no recent expenses.";
 
+		// Update details too
+		if (expenseDetailsGrid.IsVisible && viewRecentExpenses.SelectedItem is Expense e)
+		{
+			expenseDetailsGrid.BindingContext = null;
+			expenseDetailsGrid.BindingContext = e;
+		}
+
 		// We should also update the reports
 		foreach (ReportView rv in reports)
 			_ = rv.RefreshData(true);
