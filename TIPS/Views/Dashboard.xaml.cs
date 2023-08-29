@@ -1,3 +1,4 @@
+using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
@@ -160,4 +161,15 @@ public partial class Dashboard : ContentPage, DashboardModel.DashboardUI
 	{
 		viewRecentExpenses.SelectedItem = null;
     }
+
+	private void collapseRecents_Clicked(object sender, EventArgs e)
+	{
+		bool wasVisible = viewRecentExpenses.IsVisible;
+		viewRecentExpenses.IsVisible = newExpenseButton.IsVisible = viewSingleExpensesButton.IsVisible =
+			viewRecurringExpensesButton.IsVisible = !wasVisible;
+		if (wasVisible)
+			((FontImageSource)(collapseRecentsButton.Source)).Glyph = "\xf126";
+		else
+			((FontImageSource)(collapseRecentsButton.Source)).Glyph = "\xf123";
+	}
 }

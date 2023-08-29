@@ -14,9 +14,25 @@
         </Grid.GestureRecognizers>
         <VerticalStackLayout Spacing="10"
                              Padding="8" >
-            <Label Text="Most recent expenses"
-                   FontSize="24"
-                   HorizontalOptions="Center" />
+            <Grid ColumnDefinitions="*, Auto">
+                <Label Text="Most recent expenses"
+                       FontSize="24"
+                       HorizontalOptions="Center"
+                       Grid.ColumnSpan="2" />
+                <ImageButton x:Name="collapseRecentsButton"
+                             Margin="8, 0"
+                             BackgroundColor="{AppThemeBinding Default=White, Light=White, Dark=Black}"
+                             Clicked="collapseRecents_Clicked"
+                             Grid.Column="1" >
+                    <ImageButton.Source>
+                        <FontImageSource Glyph="&#xf123;"
+                                         FontFamily="ionicons"
+                                         Color="{AppThemeBinding Default=Black, Light=Black, Dark=White}">
+                            
+                        </FontImageSource>
+                    </ImageButton.Source>
+                </ImageButton>
+            </Grid>
             <ActivityIndicator IsRunning="True"
                                x:Name="recentActivityIndicator" />
             <CollectionView x:Name="viewRecentExpenses"
@@ -74,6 +90,7 @@
             </Grid>
 
             <Button Text="Add New Expense"
+                    x:Name="newExpenseButton"
                     Clicked="newExpense_Clicked" />
         
             <Button Text="View All Expenses" 
